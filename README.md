@@ -1,4 +1,11 @@
 
+# Create the docker container
+
+```
+make build
+```
+> this step can take 10-15 min the first time
+
 # Define Junos device
 
 Define each device in a pillar file in the `pillar/` directory with `<devicename>.sls`
