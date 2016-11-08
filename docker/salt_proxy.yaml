@@ -1,5 +1,2 @@
 master: saltmaster
 multiprocessing: False
-beacons:
-  junos:
-    interval: 5
