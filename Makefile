@@ -7,7 +7,6 @@ build:
 	docker build -t juniper/saltstack .
 
 master-start:
-	docker rm $(master_name) && \
 	docker run -d \
 	  --volume $(PWD)/pillar:/srv/pillar \
 		--name $(master_name) juniper/saltstack salt-master
@@ -21,4 +20,5 @@ master-keys:
 proxy-start:
 	docker run -d \
 		--link $(master_name):$(master_name) \
+		--volume $(PWD)/docker/salt_proxy.yaml:/etc/salt/proxy \
 		juniper/saltstack salt-proxy --proxyid=$(DEVICE)
