@@ -80,7 +80,7 @@ RUN mkdir -p /srv/salt /srv/pillar
 RUN sed -i 's/^#master: salt/master: localhost/;s/^#id:/id: minion/' /etc/salt/minion
 
 ### Replacing salt-proxy configuration
-##RUN if [ -f /etc/salt/proxy ]; then sed -i 's/^#master: salt/master: localhost/' /etc/salt/proxy; else echo "master: localhost\nmultiprocessing: False\n" > /etc/salt/proxy; fi
+RUN if [ -f /etc/salt/proxy ]; then sed -i 's/^#master: salt/master: localhost/' /etc/salt/proxy; else echo "master: localhost\nmultiprocessing: False\n" > /etc/salt/proxy; fi
 
 COPY docker/salt_proxy.yaml /etc/salt/proxy
 
