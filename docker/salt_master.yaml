@@ -1,0 +1,17 @@
+
+
+engines_dirs:
+  - /srv/engine
+engines:
+  - junos_syslog:
+      #port: 516
+  # - opennti_event:
+  #       server: 172.29.38.19
+  #       port: '8086'
+  #       database: juniper
+  #       tags:
+  #           - 'jnpr/*'
+
+# reactor:
+#   - 'UI_COMMIT_COMPLETED':
+#     - /srv/reactor/junos.sls
