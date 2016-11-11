@@ -73,14 +73,13 @@ RUN wget -O /root/install_salt.sh http://bootstrap.saltstack.org
 ###
 RUN sh /root/install_salt.sh -d -M -X -P git carbon
 
+RUN pip install pyparsing twisted
+
 ### Creating directories for SaltStack
 RUN mkdir -p /srv/salt /srv/pillar
 
 ### Replacing salt-minion configuration
 RUN sed -i 's/^#master: salt/master: localhost/;s/^#id:/id: minion/' /etc/salt/minion
-
-### Replacing salt-proxy configuration
-RUN if [ -f /etc/salt/proxy ]; then sed -i 's/^#master: salt/master: localhost/' /etc/salt/proxy; else echo "master: localhost\nmultiprocessing: False\n" > /etc/salt/proxy; fi
 
 #Slim the container a litte.
 RUN apt-get clean
