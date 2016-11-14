@@ -57,13 +57,14 @@ RUN wget -O /root/install_salt.sh http://bootstrap.saltstack.org
 ###
 RUN sh /root/install_salt.sh -d -M -X -P git 2016.11.0rc2 
 
+### Packages needed for junos_syslog.py SaltStack engine
 RUN pip install pyparsing twisted
 
 ### Creating directories for SaltStack
 RUN mkdir -p /srv/salt /srv/pillar
 
 ### Replacing salt-minion configuration
-RUN sed -i 's/^#master: $(DEVICE): localhost/;s/^#id:/id: minion/' /etc/salt/minion
+RUN sed -i 's/^#master: $DEVICE: localhost/;s/^#id:/id: minion/' /etc/salt/minion
 
 #Slim the container a litte.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /root/install_salt.sh
