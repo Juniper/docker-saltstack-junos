@@ -4,7 +4,7 @@ master_name = saltmaster
 PWD = $(shell pwd)
 
 build:
-	docker build -t juniper/saltstack .
+	docker build -rm true --build-arg DEVICE=$(master_name) -t juniper/saltstack .
 
 master-start:
 	docker run -d \
@@ -24,6 +24,12 @@ master-keys:
 master-clean:
 	docker stop $(master_name)
 	docker rm $(master_name)
+
+#minion-start:
+#	docker run -d \
+#		--link $(master_name):$(master_name) \
+#		--volume $(PWD)/docker/salt_minion.yaml:/etc/salt/minion \
+#		juniper/saltstack salt-minion
 
 proxy-start:
 	docker run -d \
