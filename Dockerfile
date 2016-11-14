@@ -26,11 +26,11 @@ RUN echo "deb http://archive.ubuntu.com/ubuntu trusty main universe multiverse r
   apt-get upgrade -y -o DPkg::Options::=--force-confold
 
 # Packages for PyEZ and SaltStack installation
-RUN apt-get install -y \
-  && git git-core wget python-dev python-pip \
-  && libssl-dev libxslt1-dev libxml2-dev libxslt-dev \
-  && libffi6=3.1~rc1+r3.0.13-12 libffi-dev \
-  && openssh-server locate vim
+RUN apt-get install -y --force-yes \
+  git git-core wget python-dev python-pip \
+  libssl-dev libxslt1-dev libxml2-dev libxslt-dev \
+  libffi6=3.1~rc1+r3.0.13-12 libffi-dev \
+  openssh-server locate vim
 
 ### Packages for 64bit systems
 ###
@@ -55,13 +55,13 @@ RUN wget -O /root/install_salt.sh http://bootstrap.saltstack.org
 #-M Install master, -d ignore install check, -X do not start the deamons and -P allows pip installation of some packages.
 #
 ###
-RUN sh /root/install_salt.sh -d -M -X -P git 2016.11.0rc2 
+RUN sh /root/install_salt.sh -d -M -X -P git 2016.11 
 
 ### Packages needed for junos_syslog.py SaltStack engine
 RUN pip install pyparsing twisted
 
 ### Replacing salt-minion configuration
-RUN sed -i 's/^#master: $DEVICE: localhost/;s/^#id:/id: minion/' /etc/salt/minion
+RUN sed -i "s/^#master: salt/master: localhost/;s/^#id:/id: minion/" /etc/salt/minion
 
 #Slim the container a litte.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /root/install_salt.sh

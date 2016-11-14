@@ -4,7 +4,7 @@ master_name = saltmaster
 PWD = $(shell pwd)
 
 build:
-	docker build -rm true --build-arg DEVICE=$(master_name) -t juniper/saltstack .
+	docker build --rm -t juniper/saltstack .
 
 master-start:
 	docker run -d \
@@ -35,4 +35,7 @@ proxy-start:
 	docker run -d \
 		--link $(master_name):$(master_name) \
 		--volume $(PWD)/docker/salt_proxy.yaml:/etc/salt/proxy \
-		juniper/saltstack salt-proxy --proxyid=$(DEVICE)
+		--name $(DEVICE) juniper/saltstack salt-proxy --proxyid=$(DEVICE)
+proxy-shell:
+	docker exec -i $(DEVICE) bash
+
