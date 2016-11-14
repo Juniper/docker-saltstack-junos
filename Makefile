@@ -35,7 +35,5 @@ proxy-start:
 	docker run -d \
 		--link $(master_name):$(master_name) \
 		--volume $(PWD)/docker/salt_proxy.yaml:/etc/salt/proxy \
-		--name $(DEVICE) juniper/saltstack salt-proxy --proxyid=$(DEVICE)
-proxy-shell:
-	docker exec -i $(DEVICE) bash
+		--name $(DEVICE) juniper/saltstack salt-proxy --proxyid=$(DEVICE) 
 
