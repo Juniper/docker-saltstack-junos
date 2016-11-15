@@ -1,4 +1,4 @@
-# DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
+#  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER
 #
 # Copyright 2016 Juniper Networks, Inc. 
 # All rights reserved.
@@ -27,10 +27,13 @@ RUN echo "deb http://archive.ubuntu.com/ubuntu trusty main universe multiverse r
 
 # Packages for PyEZ and SaltStack installation
 RUN apt-get install -y --force-yes \
-  git git-core wget python-dev python-pip \
+  git git-core curl python-dev \
   libssl-dev libxslt1-dev libxml2-dev libxslt-dev \
   libffi6=3.1~rc1+r3.0.13-12 libffi-dev \
   openssh-server locate vim
+
+# Install PIP via source. Fixed by @ntwrkguru
+RUN curl https://bootstrap.pypa.io/get-pip.py | python
 
 ### Packages for 64bit systems
 ###
@@ -39,14 +42,14 @@ RUN apt-get install -y --force-yes \
 ###
 RUN if [ "$(uname -m)" = "x86_64" ]; then apt-get install -y lib32z1-dev zlib1g-dev; fi
 
-# Installing PyEZ and jxmlease for SaltStack salt-proxy
+# Installing PyEZ (and its hidden dependencies) and jxmlease for SaltStack salt-proxy
 RUN pip install junos-eznc jxmlease
 
 ### Retrieving bootstrap.sh form SaltStack
 ###
 # Installation manager for SaltStack.
 ###
-RUN wget -O /root/install_salt.sh http://bootstrap.saltstack.org
+RUN curl -Ls http://bootstrap.saltstack.org -o /root/install_salt.sh 
 
 ### Installing SaltStack (carbon release).
 ###
@@ -61,7 +64,7 @@ RUN sh /root/install_salt.sh -d -M -X -P git 2016.11
 RUN pip install pyparsing twisted
 
 ### Replacing salt-minion configuration
-RUN sed -i "s/^#master: salt/master: localhost/;s/^#id:/id: minion/" /etc/salt/minion
+#RUN sed -i "s/^#master: salt/master: localhost/;s/^#id:/id: minion/" /etc/salt/minion
 
 #Slim the container a litte.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /root/install_salt.sh

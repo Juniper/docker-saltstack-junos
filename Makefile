@@ -31,7 +31,7 @@ RUN_MINION += $(RUN_PATH)/started_minions.log
 RUN_PROXY +=  $(RUN_PATH)/started_proxies.log
 
 build:
-	docker build -t juniper/saltstack .
+	docker build --rm -t juniper/saltstack .
 
 master-start:
 	docker run -d \
@@ -73,6 +73,7 @@ ifndef DEVICE
  		docker stop $$minion && \
 		docker rm $$minion; \
 	done <$(RUN_MINION)
+	echo "" > $(RUN_MINION)
 else
 	docker stop $(DEVICE) && \
 	docker rm $(DEVICE) && \
@@ -93,6 +94,7 @@ ifndef DEVICE
 		docker stop $$proxy && \
 		docker rm $$proxy; \
 	done <$(RUN_PROXY)
+	echo "" > $(RUN_PROXY)
 else
 	docker stop $(DEVICE) && \
 	docker rm $(DEVICE) && \

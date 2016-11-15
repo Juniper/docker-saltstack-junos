@@ -1,3 +1,4 @@
+
 # SaltStack Docker Container for Junos
 
 This project has been designed to help you get started easily with SaltStack on Junos.
@@ -5,6 +6,9 @@ In this project you'll find:
 - **A docker container** with all SaltStack and all Junos Libraries
 - **Make script** to easily start the docker container
 - **A SaltStack Engine** to collect Syslog from Junos and convert them into Events in SaltStack
+
+# Known Issues
+- **urllib3\util\ssl_.py: SNIMissingWarning, InsecurePlatform Warning:** Solution is to upgrade Python from 2.7.6 to 2.7.9 or ```pip install pyOpenSSL ndg-httpsclient pyasn1```. Please note it does not effect salt-master, salt-minion or salt-proxy, in their functionality. 
 
 # Get Started with Salt on Docker
 ## 1- Define Junos device
