@@ -8,7 +8,7 @@ In this project you'll find:
 - **A SaltStack Engine** to collect Syslog from Junos and convert them into Events in SaltStack
 
 # Known Issues
-- **urllib3\util\ssl_.py: SNIMissingWarning, InsecurePlatform Warning:** Solution is to upgrade Python from 2.7.6 to 2.7.9 or ```pip install pyOpenSSL ndg-httpsclient pyasn1```. Please note it does not effect salt-master, salt-minion or salt-proxy, in their functionality. 
+- **urllib3\util\ssl_.py - 'SNIMissingWarning, InsecurePlatform' Warnings:** Solution is to upgrade Python from 2.7.6 to 2.7.9 or ```pip install pyOpenSSL ndg-httpsclient pyasn1```. Please note it does not effect salt-master, salt-minion or salt-proxy, in their functionality. 
 
 # Get Started with Salt on Docker
 ## 1- Define Junos device
@@ -39,9 +39,10 @@ base:
 make master-start
 ```
 
-**Directories mapping**
+#### Directories mapping
 The local directory `pillar`, `engine` & `reactor` are automatically mapped to the
 internal directory `/srv/pillar`, `/srv/engine` and `/srv/reactor`
+
 The file `docker/salt_master.yaml` is automatically mapped to `/etc/salt/master`
 
 #### Port Redirection
@@ -56,21 +57,21 @@ make proxy-start DEVICE=dev02
 ```
 > you need one container for each device you want to add
 
-**Directories mapping**
+### Directories mapping
 The file `docker/salt_proxy.yaml` is automatically mapped to `/etc/salt/proxy`
 
 ## 4- Accept Proxy Keys on Master
 
 Once your proxy are running you should see them in the list of `Unaccepted Keys` on the master
 
-YOu can check the list of keys using:
+You can check the list of keys using:
 ```
 make master-keys
 ```
 
 To accept the keys, you need to go inside the container and run `salt-key -A`
 
-GO in shell inside the container
+Go in shell inside the container
 ```
 make master-shell
 ```
@@ -87,6 +88,13 @@ Proceed? [n/Y] Y
 Key for minion minion accepted.
 ```
 
+### Optional
+
+You can accept all keys at once:
+```
+make accept-keys
+```
+
 ## 5- Verify
 
 Check that all containers are running
@@ -96,12 +104,17 @@ docker ps
 
 Ping Junos devices
 ```shell
-# Go inside main container and run junos.ping
+
+# Operation 
+
+Useful verfication commands
+
+## Go inside main container and run junos.ping
 make master-shell
 salt '*' junos.ping
 ```
 
-# Engine - Junos Syslog
+## Engine - Junos Syslog
 
 An engine that listen to syslog message from Junos devices,
 extract event information and generate message on SaltStack bus.
@@ -113,12 +126,12 @@ Example of configuration
         port: 516
 ```
 
-## Dependancies
+### Dependencies
 ```
 pip install pyparsing twisted
 ```
 
-# Events on SaltStack
+## Events on SaltStack
 ### Useful commands to experiment with Events
 #### Listen to all events on the Salt Bus
 ```
@@ -131,7 +144,7 @@ Useful when you need to test your reactor
 salt-call event.send 'jnpr/event/dev01/UI_COMMIT_COMPLETED' '{"host": "172.17.0.1", "data": {"severity": 4, "appname": "mgd", "timestamp": "2016-11-11 20:40:44", "hostname": "dev01", "pid": "1584", "priority": 188 }'
 ```
 
-# Create the docker container yourself
+## Create the docker container yourself
 
 The container is available on Docker Hub but if you prefer to built it yourself.
 ```
