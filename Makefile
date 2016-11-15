@@ -26,6 +26,9 @@ DOCKER_LINK := $(DOCKER_RUN) --link $(master_name):$(master_name)
 DOCKER_RUN_MINION := $(DOCKER_LINK) --volume $(PWD)/docker/salt_minion.yaml:/etc/salt/minion
 DOCKER_RUN_PROXY := $(DOCKER_LINK) --volume $(PWD)/docker/salt_proxy.yaml:/etc/salt/proxy
 
+RUN_PATH := $(PWD)/run
+RUN_MINION += $(RUN_PATH)/started_minions.log
+RUN_PROXY +=  $(RUN_PATH)/started_proxies.log
 
 build:
 	docker build -t juniper/saltstack .
@@ -39,8 +42,8 @@ master-start:
 		--publish 8516:516/udp \
 		--name $(master_name) juniper/saltstack salt-master
 	
-	touch $(PWD)/started_minions
-	touch $(PWD)/started_proxies
+	touch $(RUN_MINION)
+	touch $(RUN_PROXY)
 
 master-shell:
 	$(DOCKER_EXEC_MASTER) bash
@@ -57,39 +60,43 @@ master-clean:
 
 minion-start:
 ifndef DEVICE
-	$(DOCKER_RUN_MINION) juniper/saltstack salt-minion 2>/dev/null 1>>$(PWD)/started_minions
+	$(DOCKER_RUN_MINION) juniper/saltstack salt-minion 2>/dev/null 1>>$(RUN_MINION)
 else
-	$(DOCKER_RUN_MINION) --name $(DEVICE) juniper/saltstack salt-minion \
-	2>/dev/null && if [ $$? -eq 0 ]; then echo $(DEVICE) >> $(PWD)/started_minions; fi
+	$(DOCKER_RUN_MINION) --name $(DEVICE) juniper/saltstack salt-minion -l warning \
+	2>/dev/null && if [ $$? -eq 0 ]; then echo "$(DEVICE)" >> $(RUN_MINION); fi
 endif	
 
 
 minion-clean:
 ifndef DEVICE
 	@while read -r minion; do \
- 		docker stop $$minion && docker rm $$minion; \
-	done <$(PWD)/started_minions
+ 		docker stop $$minion && \
+		docker rm $$minion; \
+	done <$(RUN_MINION)
 else
-	docker stop $(DEVICE) && docker rm $(DEVICE) && \
-	sed -i '/$(DEVICE)/d' $(PWD)/started_minions
+	docker stop $(DEVICE) && \
+	docker rm $(DEVICE) && \
+	sed -i '/$(DEVICE)/d' $(RUN_MINION)
 endif
 
 proxy-start:
 ifndef DEVICE
 	$(error DEVICE parameter is not set. Please use 'make proxy-start DEVICE=<name>')
 else 
-	$(DOCKER_RUN_PROXY) --name $(DEVICE) juniper/saltstack salt-proxy --proxyid=$(DEVICE) \
-	2>/dev/null && if [ $$? -eq 0 ]; then echo $(DEVICE) >> $(PWD)/started_proxies; fi  
+	$(DOCKER_RUN_PROXY) --name $(DEVICE) juniper/saltstack salt-proxy --proxyid=$(DEVICE) -l warning \
+	2>/dev/null && if [ $$? -eq 0 ]; then echo $(DEVICE) >> $(RUN_PROXY); fi  
 endif
 
 proxy-clean:
 ifndef DEVICE
 	@while read -r proxy; do \
-		docker stop $$proxy && docker rm $$proxy; \
-	done <$(PWD)/started_proxies
+		docker stop $$proxy && \
+		docker rm $$proxy; \
+	done <$(RUN_PROXY)
 else
-	docker stop $(DEVICE) && docker rm $(DEVICE) && \
-	sed -i '/$(DEVICE)/d' $(PWD)/started_proxies
+	docker stop $(DEVICE) && \
+	docker rm $(DEVICE) && \
+	sed -i '/$(DEVICE)/d' $(RUN_PROXY)
 endif
 
 clean-not-master: minion-clean proxy-clean
