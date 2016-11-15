@@ -102,14 +102,15 @@ Check that all containers are running
 docker ps
 ```
 
-Ping Junos devices
-```shell
-
 # Operation 
 
 Useful verfication commands
 
 ## Go inside main container and run junos.ping
+
+Ping Junos devices
+
+```shell
 make master-shell
 salt '*' junos.ping
 ```
