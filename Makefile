@@ -25,6 +25,7 @@ DOCKER_LINK := $(DOCKER_RUN) --link $(master_name):$(master_name)
 
 DOCKER_RUN_MINION := $(DOCKER_LINK) --volume $(PWD)/docker/salt_minion.yaml:/etc/salt/minion
 DOCKER_RUN_PROXY := $(DOCKER_LINK) --volume $(PWD)/docker/salt_proxy.yaml:/etc/salt/proxy
+DOCKER_RUN_PROXY += --volume $(PWD)/pillar:/srv/pillar
 
 RUN_PATH := $(PWD)/run
 RUN_MINION += $(RUN_PATH)/started_minions.log
@@ -101,6 +102,4 @@ else
 	sed -i '/$(DEVICE)/d' $(RUN_PROXY)
 endif
 
-clean-not-master: minion-clean proxy-clean
- 
 clean: master-clean minion-clean proxy-clean
