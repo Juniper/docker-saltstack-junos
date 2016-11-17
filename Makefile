@@ -36,7 +36,7 @@ DOCKER_RUN_PROXY += --volume $(PWD)/pillar:/srv/pillar
 
 STOP_RM_DOCKER = echo "Stopping:$(1)" && docker stop $(1) 1>/dev/null && echo "Removing:" $(1) && docker rm $(1) 1>/dev/null
 
-#TODO: Accept a key automatically when minion/proxy when spinning up.
+#TODO: Accept a key automatically at master for minion/proxy when spinning up.
 #ACCEPT_SPECIFIC_KEY = $(DOCKER_EXEC_MASTER) salt-key -ya $(1)
 
 build:
