@@ -12,6 +12,18 @@ In this project you'll find:
 - **urllib3\util\ssl_.py - 'SNIMissingWarning, InsecurePlatform' Warnings:** Solution is to upgrade Python from 2.7.6 to 2.7.9 or ```pip install pyOpenSSL ndg-httpsclient pyasn1```. Please note it does not effect salt-master, salt-minion or salt-proxy, in their functionality. 
 
 # Getting Started with Salt on Docker
+## 0- Get/build image
+
+Get the image via docker hub:
+```
+docker pull juniper/saltstack
+```
+
+or build your own image from git:
+```
+make build
+```
+
 ## 1- Define Junos device
 
 Define each Junos device in a pillar file in the `pillar/` directory with `<devicename>.sls`
@@ -77,9 +89,9 @@ Proceed? [n/Y] Y
 Key for minion minion accepted.
 ```
 
-### Optional
+### (Optional) The lazy way:
 
-You can accept all keys at once:
+You can accept all keys at once
 ```
 make accept-keys
 ```
@@ -91,7 +103,62 @@ Check that all containers are running
 docker ps
 ```
 
-# Deeper understanding of the Makefile
+# Advance use-case with beacon (TODO complete Doku)
+In this use-case, we show, how you can monitor a string and trigger an action.
+The beacon used is called "log.py" is a custom beacon. 
+We will show how to deploy this beacon.
+
+## 0- Get/build image
+
+Get the image via docker hub:
+```
+docker pull juniper/saltstack
+```
+
+or build your own image from git:
+```
+make build
+```
+
+## 1- Define the Beacon
+
+Define the log beacon -residing at the minion- with a "file" and "regex" parameter under the `pillar/`. For our example we are using `log.sls` as filename.
+
+```yaml
+# pillar/log.sls
+beacons:
+      log:
+        file: /var/log/salt/minion
+        catch_error_messages:
+                     regex: '.*ERROR.*'
+```
+
+In this example, we are monitoring the string "ERROR" within /var/log/salt/minion.
+
+Define a rule for beacon log should be activate under `pillar/top.sls`
+```yaml
+base:
+   '*':
+     - log
+```
+
+In this example, all minion's should have the beacon activated
+
+## 2- Define the Reactor
+
+## 3- Start master container
+
+## 4- Start a minion container
+
+## 5- Transfer beacon from master to minion
+
+## 6- Restart the minion (PR# in SaltStack)
+
+## 7- Trigger event on minion
+
+## 8- See event on master
+
+# Deep-dive into the Makefile
  
 The makefile in this project is used to, start and clean, any number of containers of salt-minion's and salt-proxies. This allows the user easier manage, operate and configure SaltStack topologies. It combines SaltStack requirements with Container flexibility.  
 
@@ -209,9 +276,10 @@ make minion-clean
 
 #####Note
 `DEVICE` specifies the name of which container should be deleted. 
+
 If `DEVICE=<name>` is used, the specific salt-minion container will be stopped and deleted.
 
-IF `DEVICE=<name>` is NOT used, all salt-minion container's are being stopped and deleted.
+If `DEVICE=<name>` is NOT used, all salt-minion container's are being stopped and deleted.
 
 Attached volumes and files are not deleted. 
 
@@ -262,7 +330,7 @@ make proxy-clean
 
 If `DEVICE=<name>` is used, the specific salt-proxy container will be stopped and deleted.
 
-IF `DEVICE=<name>` is NOT used, all salt-proxy container's are being stopped and deleted.
+If `DEVICE=<name>` is NOT used, all salt-proxy container's are being stopped and deleted.
 
 Attached volumes and files are not deleted. 
 
@@ -302,6 +370,7 @@ Example of configuration
     - junos_syslog:
         port: 516
 ```
+
 
 ### Dependencies
 ```
