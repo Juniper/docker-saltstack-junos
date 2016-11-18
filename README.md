@@ -103,7 +103,7 @@ Check that all containers are running
 docker ps
 ```
 
-# Advance use-case with beacon
+# Advance use-case with beacon (TODO complete Doku)
 In this use-case, we show, how you can monitor a string and trigger an action.
 The beacon used is called "log.py" is a custom beacon. 
 We will show how to deploy this beacon.
@@ -144,18 +144,19 @@ base:
 
 In this example, all minion's should have the beacon activated
 
-## 2- Start master container
+## 2- Define the Reactor
 
-```
-make master-start
-```
+## 3- Start master container
 
+## 4- Start a minion container
 
-## 3- Start a minion container.
-```
+## 5- Transfer beacon from master to minion
 
-```
+## 6- Restart the minion (PR# in SaltStack)
 
+## 7- Trigger event on minion
+
+## 8- See event on master
 
 # Deep-dive into the Makefile
  
@@ -275,9 +276,10 @@ make minion-clean
 
 #####Note
 `DEVICE` specifies the name of which container should be deleted. 
+
 If `DEVICE=<name>` is used, the specific salt-minion container will be stopped and deleted.
 
-IF `DEVICE=<name>` is NOT used, all salt-minion container's are being stopped and deleted.
+If `DEVICE=<name>` is NOT used, all salt-minion container's are being stopped and deleted.
 
 Attached volumes and files are not deleted. 
 
@@ -328,7 +330,7 @@ make proxy-clean
 
 If `DEVICE=<name>` is used, the specific salt-proxy container will be stopped and deleted.
 
-IF `DEVICE=<name>` is NOT used, all salt-proxy container's are being stopped and deleted.
+If `DEVICE=<name>` is NOT used, all salt-proxy container's are being stopped and deleted.
 
 Attached volumes and files are not deleted. 
 
