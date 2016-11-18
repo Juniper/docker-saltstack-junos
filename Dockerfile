@@ -43,7 +43,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py | python
 RUN if [ "$(uname -m)" = "x86_64" ]; then apt-get install -y lib32z1-dev zlib1g-dev; fi
 
 # Installing PyEZ (and its hidden dependencies) and jxmlease for SaltStack salt-proxy
-RUN pip install junos-eznc jxmlease
+RUN pip install regex junos-eznc jxmlease
 
 ### Retrieving bootstrap.sh form SaltStack
 ###

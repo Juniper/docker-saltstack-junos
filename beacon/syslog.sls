@@ -1,8 +1,8 @@
 {% if data['data']['match'] == 'yes' %}
 
-foo:
+junos_get_version:
    local.cmd.run:
-      - tgt: ""
+      - tgt: "*"
       - arg: 
           - 
 

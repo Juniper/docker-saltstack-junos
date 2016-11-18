@@ -24,13 +24,22 @@ DOCKER_EXEC := @docker exec -i -t
 DOCKER_EXEC_MASTER := $(DOCKER_EXEC) $(master_name)
 
 DOCKER_RUN := @docker run -d 
-DOCKER_RUN_MASTER := $(DOCKER_RUN) --volume $(PWD)/pillar:/srv/pillar
+DOCKER_RUN_MASTER := $(DOCKER_RUN) -h $(master_name) --volume $(PWD)/pillar:/srv/pillar
 DOCKER_RUN_MASTER += --volume $(PWD)/reactor:/srv/reactor
 DOCKER_RUN_MASTER += --volume $(PWD)/engine:/srv/engine
+DOCKER_RUN_MASTER += --volume $(PWD)/docker/master:/etc/salt/master.d
+DOCKER_RUN_MASTER += --volume $(PWD)/docker/_beacons:/srv/salt/_beacons
+#DOCKER_RUN_MASTER += --volume $(PWD)/docker/minion:/etc/salt/minion.d
 DOCKER_RUN_MASTER += --volume $(PWD)/docker/salt_master.yaml:/etc/salt/master
 DOCKER_RUN_MASTER += --publish 8516:516/udp
+
 DOCKER_LINK := $(DOCKER_RUN) --link $(master_name):$(master_name)
-DOCKER_RUN_MINION := $(DOCKER_LINK) --volume $(PWD)/docker/salt_minion.yaml:/etc/salt/minion
+
+DOCKER_RUN_MINION := $(DOCKER_LINK) 
+DOCKER_RUN_MINION += --volume $(PWD)/docker/salt_minion.yaml:/etc/salt/minion
+#DOCKER_RUN_MINION += --volume $(PWD)/docker/minion:/etc/salt/minion.d
+DOCKER_RUN_MINION += --volume $(PWD)/pillar:/srv/pillar
+
 DOCKER_RUN_PROXY := $(DOCKER_LINK) --volume $(PWD)/docker/salt_proxy.yaml:/etc/salt/proxy
 DOCKER_RUN_PROXY += --volume $(PWD)/pillar:/srv/pillar
 
@@ -43,7 +52,7 @@ build:
 	docker build --rm -t juniper/saltstack .
 
 master-start:
-	$(DOCKER_RUN_MASTER) --name $(master_name) juniper/saltstack salt-master
+	$(DOCKER_RUN_MASTER) --name $(master_name) juniper/saltstack salt-master -l debug 
 	
 	@touch $(RUN_MINION)
 	@touch $(RUN_PROXY)
@@ -63,11 +72,11 @@ master-clean:
 
 minion-start:
 ifndef DEVICE
-	$(DOCKER_RUN_MINION) juniper/saltstack salt-minion -l warning \
-	2>/dev/null 1>>$(RUN_MINION) && echo -n "Started: " && tail -n1 $(RUN_MINION)
+	$(DOCKER_RUN_MINION) juniper/saltstack salt-minion -l debug \
+	1>>$(RUN_MINION) && echo -n "Started: " && tail -n1 $(RUN_MINION)
 else
-	$(DOCKER_RUN_MINION) --name $(DEVICE) -h $(DEVICE) juniper/saltstack salt-minion -l warning \
-	>/dev/null 2>&1 && if [ $$? -eq 0 ]; then echo "$(DEVICE)" >> $(RUN_MINION); echo "Started: $(DEVICE)"; fi
+	$(DOCKER_RUN_MINION) --name $(DEVICE) -h $(DEVICE) juniper/saltstack salt-minion -l debug \
+	1>/dev/null && if [ $$? -eq 0 ]; then echo "$(DEVICE)" >> $(RUN_MINION); echo "Started: $(DEVICE)"; fi
 endif	
 
 minion-shell:
@@ -93,8 +102,8 @@ proxy-start:
 ifndef DEVICE
 	$(error DEVICE parameter is not set. Please use 'make proxy-start DEVICE=<name>')
 else 
-	$(DOCKER_RUN_PROXY) --name $(DEVICE) -h $(DEVICE) juniper/saltstack salt-proxy --proxyid=$(DEVICE) -l warning \
-	>/dev/null 2>&1 && if [ $$? -eq 0 ]; then echo "$(DEVICE)" >> $(RUN_PROXY); echo "Started: $(DEVICE)"; fi  
+	$(DOCKER_RUN_PROXY) --name $(DEVICE) -h $(DEVICE) juniper/saltstack salt-proxy --proxyid=$(DEVICE) -l debug \
+	1>/dev/null && if [ $$? -eq 0 ]; then echo "$(DEVICE)" >> $(RUN_PROXY); echo "Started: $(DEVICE)"; fi  
 endif
 
 proxy-shell: minion-shell
