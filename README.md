@@ -28,7 +28,7 @@ We believe to have the best possible understanding/knowledge, you should read al
 
 To save time, the minimum what you should read:
 - The documentation applicable for your use-case.
-- (Example make commands under this document)[#example].
+- [Example make commands](#example).
 
 # Deep-dive into the Makefile
  
@@ -245,7 +245,7 @@ make minion-clean
 make proxy-clean
 ```
 
-#<a href id="example"></a>Example of make commands
+#<a id='example'></a>Example of make commands
 
 ```
 #Spin a default master
