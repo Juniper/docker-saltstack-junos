@@ -279,7 +279,6 @@ make proxy-clean DEVICE="bar" UC="engine"
 make clean UC="engine"
 
 #Clean all containers under default use-case
-```
 make clean
 ```
 
