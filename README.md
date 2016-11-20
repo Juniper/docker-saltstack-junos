@@ -9,8 +9,8 @@ In this project you'll find:
 
 # Contributer
 
-- Iddo Cohen
 - Damien Garros
+- Iddo Cohen
 - Nitin Kumar
 - Stephen Steiner 
 
