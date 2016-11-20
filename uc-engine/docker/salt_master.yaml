@@ -1,0 +1,7 @@
+master: localhost
+
+engines_dirs:
+  - /srv/engine
+engines:
+  - junos_syslog:
+       port: 516
