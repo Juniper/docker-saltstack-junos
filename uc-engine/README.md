@@ -135,11 +135,11 @@ See here [the events triggered under Salt Master](#result)
 Salt-call must summon a salt-minion on the saltmaster-engine, to send and process that event.
 
 Prerequisite steps are therefore need to be done, to make `salt-call` work:
-1) Edit `/etc/salt/minion` and replace `master: salt` with `master: saltmaster-engine`
-2) Restart the saltmaster-engine from host machine with `docker restart saltmaster-engine`
-3) Accept the minion key on the master with `salt-keys -yA`
+1. Edit `/etc/salt/minion` and replace `master: salt` with `master: saltmaster-engine`
+2. Restart the saltmaster-engine from host machine with `docker restart saltmaster-engine`
+3. Accept the minion key on the master with `salt-keys -yA`
 
-This salt-call can be used test the event under saltmaster-engine:
+Then this salt-call can be used test the event under saltmaster-engine:
 ```
 salt-call event.send 'jnpr/event/proxy01/UI_COMMIT_COMPLETED' '{"host": "172.17.254.1", "data": {"severity": 4, "appname": "mgd", "timestamp": "2016-11-17 19:30:14", "hostname": "proxy01", "pid": "84", "priority": 188 }'
 ```
