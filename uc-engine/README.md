@@ -1,4 +1,4 @@
-# Engine use-case
+# Use-Case - Engine Event Triggering
 
 The idea: 
 - To show how SaltStack can receive Syslog messages from Junos and convert them into events for SaltStack
@@ -84,7 +84,7 @@ make proxy-shell DEVICE='proxy01' UC='engine'
 
 Check IP of Salt Master
 ```
-make master-shell UC='engine'
+# In the saltmaster-engine shell use:
 ifconfig eth0
 ```
 

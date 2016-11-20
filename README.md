@@ -3,18 +3,9 @@
 This project has been designed to help you to get started easily with SaltStack on Junos.
 In this project you'll find:
 - **A docker container** with all SaltStack and all Junos Libraries
-- **Make script** to easily start the docker container
-
-To reduce the learning curve with SaltStack:
+- **Make script** to easily start, stop and clean any number of docker containers
 - **A Use-Case with SaltStack Engine** to collect Syslog from Junos and convert them into Events in SaltStack
 - **A Use-Case with SaltStack Beacon** to monitor a Junos string in a file and convert it into Event in SaltStack
-were created.
-
-# Skipping Section
-
-If you want to dive into the use-cases directly, not caring about possible `make` commands then  please skip this section and read the README with each use-case folder e.g. uc-engine.
-
-If not continue reading. 
 
 # Contributer
 
@@ -27,157 +18,15 @@ If not continue reading.
 
 - **urllib3\util\ssl_.py - 'SNIMissingWarning, InsecurePlatform' Warnings:** Solution is to upgrade Python from 2.7.6 to 2.7.9 or ```pip install pyOpenSSL ndg-httpsclient pyasn1```. Please note it does not effect salt-master, salt-minion or salt-proxy, in their functionality. 
 
-# Host Platform Tested:
+# Host Platforms Tested:
 
 - Ubuntu 14.04 - 16.04 
 
+# Skipping Section
 
-# Getting Started with Salt on Docker
-## 0- Get/build image
+If you want to dive into the use-cases directly -not caring about possible `make` commands- then please skip this section and read the README within each folder.
 
-Get the image via docker hub:
-```
-docker pull juniper/saltstack
-```
-
-or build your own image from git:
-```
-make build
-```
-
-## 1- Define Junos device
-
-Define each Junos device in a pillar file in the `pillar/` directory with `<devicename>.sls`
-
-```yaml
-# pillar/dev02.sls
-proxy:
-  proxytype: junos
-  host: <ip>
-  username: <login>
-  passwd: <password>
-```
-
-All devices needs to be define as well in the `pillar/top.sls`
-```yaml
-base:
-  dev01:
-    - dev01
-  dev02:
-    - dev02
-```
-
-## 2- Start main container running Salt Master
-
-```
-make master-start
-```
-
-## 3- Start one container running Salt Proxy for each device
-
-```
-make proxy-start DEVICE=dev01
-make proxy-start DEVICE=dev02
-```
-> you need one container for each device you want to add
-
-
-## 4- Accept Proxy Keys on Master
-
-Once your proxy are running you should see them in the list of `Unaccepted Keys` on the master
-
-You can check the list of keys using:
-```
-make master-keys
-```
-
-To accept the keys, you need to go inside the container and run `salt-key -A`
-
-Go in shell inside the container
-```
-make master-shell
-```
-
-Accept all keys
-```
-root@master> salt-key -A
-
-The following keys are going to be accepted:
-Unaccepted Keys:
-dev01
-dev02
-Proceed? [n/Y] Y
-Key for minion minion accepted.
-```
-
-### (Optional) The lazy way:
-
-You can accept all keys at once
-```
-make accept-keys
-```
-
-## 5- Verify
-
-Check that all containers are running
-```
-docker ps
-```
-
-# Advance use-case with beacon (TODO complete Doku)
-In this use-case, we show, how you can monitor a string and trigger an action.
-The beacon used is called "log.py" is a custom beacon. 
-We will show how to deploy this beacon.
-
-## 0- Get/build image
-
-Get the image via docker hub:
-```
-docker pull juniper/saltstack
-```
-
-or build your own image from git:
-```
-make build
-```
-
-## 1- Define the Beacon
-
-Define the log beacon -residing at the minion- with a "file" and "regex" parameter under the `pillar/`. For our example we are using `log.sls` as filename.
-
-```yaml
-# pillar/log.sls
-beacons:
-      log:
-        file: /var/log/salt/minion
-        catch_error_messages:
-                     regex: '.*ERROR.*'
-```
-
-In this example, we are monitoring the string "ERROR" within /var/log/salt/minion.
-
-Define a rule for beacon log should be activate under `pillar/top.sls`
-```yaml
-base:
-   '*':
-     - log
-```
-
-In this example, all minion's should have the beacon activated
-
-## 2- Define the Reactor
-
-## 3- Start master container
-
-## 4- Start a minion container
-
-## 5- Transfer beacon from master to minion
-
-## 6- Restart the minion (PR# in SaltStack)
-
-## 7- Trigger event on minion
-
-## 8- See event on master
+If not continue reading. 
 
 # Deep-dive into the Makefile
  
@@ -194,6 +43,31 @@ The makefile in this project is used to, start and clean, any number of containe
 - Not enough testing done on other platforms. 
 
 ## Overview of Commands
+
+For all upcoming commands other then `make build`, the parameter `UC='<uc-case-name->'` can be used.
+
+If not defined, then `make` falls under the `default` use-case.
+
+For example:
+```
+make master-start UC='engine'
+```
+would spin up a master called saltmaster-engine for use-case `engine`
+
+however if not used:
+```
+make master-start
+```
+then a default master called saltmaster-default would be spined up.
+
+The same goes for cleaning:
+```
+make minion-clean UC='engine'
+```
+only the minions under the engine use-case are cleaned.
+
+
+**Thereby for all none specific use-cases scenarios, use make without the `UC=...` parameter**
 
 ### Build image from Dockerfile with make
 
@@ -379,25 +253,6 @@ Ping Junos devices
 make master-shell
 salt '*' junos.ping
 ```
-
-## Engine - Junos Syslog
-
-An engine that listen to syslog message from Junos devices,
-extract event information and generate message on SaltStack bus.
-
-Example of configuration
-```yaml
-  engines:
-    - junos_syslog:
-        port: 516
-```
-
-
-### Dependencies
-```
-pip install pyparsing twisted
-```
-
 ## Events on SaltStack
 ### Useful commands to experiment with Events
 #### Listen to all events on the Salt Bus

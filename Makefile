@@ -43,7 +43,7 @@ RUN_PROXY +=  $(RUN_PATH)/started_proxies.log
 DOCKER_EXEC := @docker exec -i -t  
 DOCKER_EXEC_MASTER := $(DOCKER_EXEC) $(master_name)
 
-DOCKER_RUN := docker run -d 
+DOCKER_RUN := @docker run -d 
 DOCKER_RUN_MASTER := $(DOCKER_RUN) -h $(master_name) 
 DOCKER_RUN_MASTER += --volume $(PWD)/pillar:/srv/pillar
 
@@ -58,10 +58,8 @@ endif
 
 ifeq "$(UC)" "$(UC_E)"
 DOCKER_RUN_MASTER += --volume $(PWD)/docker/salt_master.yaml:/etc/salt/master
-#DOCKER_RUN_MASTER += --volume $(PWD)/docker/salt_minion.yaml:/etc/salt/minion
 DOCKER_RUN_MASTER += --volume $(PWD)/docker/master:/etc/salt/master.d
 DOCKER_RUN_MASTER += --volume $(PWD)/engine:/srv/engine
-DOCKER_RUN_MASTER += --volume $(PWD)/pillar:/srv/pillar
 endif
 
 ifeq "$(UC)" "$(UC_E)"
@@ -75,11 +73,9 @@ DOCKER_RUN_MINION += --volume $(PWD)/docker/salt_minion.yaml:/etc/salt/minion
 ifeq "$(UC)" "$(UC_B)"
 DOCKER_RUN_MINION += --volume $(PWD)/docker/random.log:/var/log/random.log
 endif
-#DOCKER_RUN_MINION += --volume $(PWD)/pillar:/srv/pillar
 
 DOCKER_RUN_PROXY := $(DOCKER_LINK) 
 DOCKER_RUN_PROXY += --volume $(PWD)/docker/salt_proxy.yaml:/etc/salt/proxy
-#DOCKER_RUN_PROXY += --volume $(PWD)/pillar:/srv/pillar
 
 STOP_RM_DOCKER = echo "Stopping:$(1)" && docker stop $(1) 1>/dev/null && echo "Removing:" $(1) && docker rm $(1) 1>/dev/null
 
