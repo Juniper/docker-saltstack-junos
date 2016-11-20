@@ -135,9 +135,9 @@ See here [the events triggered under Salt Master](#result)
 Salt-call must summon a salt-minion on the saltmaster-engine, to send and process that event.
 
 Prerequisite steps are therefore need to be done, to make `salt-call` work:
-1. Edit `/etc/salt/minion` and replace `master: salt` with `master: saltmaster-engine`
-2. Restart the saltmaster-engine from host machine with `docker restart saltmaster-engine`
-3. Accept the minion key on the master with `salt-keys -yA`
+- Edit `/etc/salt/minion` and replace `master: salt` with `master: saltmaster-engine`
+- Restart the saltmaster-engine from host machine with `docker restart saltmaster-engine`
+- Accept the minion key on the master with `salt-keys -yA`
 
 Then this salt-call can be used test the event under saltmaster-engine:
 ```
