@@ -1,4 +1,4 @@
-# The Use-Case with Engine
+# Engine use-case
 
 The idea: 
 - To show how SaltStack can receive Syslog messages from Junos and convert them into events for SaltStack
@@ -14,21 +14,139 @@ The components used for the example:
 - `salt-master` called `satlmaster-engine` having the Syslog engine running.
 - `salt-proxy` called `proxy01` connecting to a Junos device.
 - a vMX with IP 172.17.254.1 which sends Syslog messages to the SaltStack engine.
-- (optional) if vMX cannot be used then to simulate an event on the event-bus a `salt-call` can be used. Please refer to [salt-call](#salt-call) section.
+- (optional) if vMX cannot be used then `salt-call` can be used to simulate the event on the bus. Please refer to [salt-call](#salt-call) section.
 
-## Spin-up the use-case:
+## Spin-up the use-case
 
-### 0- 
+**All commands must be executed under main directory (cd ..)**
 
-## <a id='salt-call'></a>If using salt-call
+### 0- Get/build image
 
-Salt-call will summon a minion on a master, to execute that event.
+Get the image via docker hub:
+```
+docker pull juniper/saltstack
+```
 
-Prerequisite steps to make `salt-call` to work:
+or build your own image from git:
+```
+make build
+```
+
+### 1- Define Junos device
+
+Define Junos device in the pillar file `proxy01.sls` in the `pillar/` directory.
+
+```yaml
+# pillar/proxy01.sls
+proxy:
+  proxytype: junos
+  host: <ip>
+  username: <login>
+  passwd: <password>
+```
+
+This device is also defined under `pillar/top.sls`
+```yaml
+# pillar/top.sls
+base:
+  proxy01:
+    - proxy01
+```
+
+### 2- Start use-case
+
+To start the use-case:
+```
+make start-uc-engine
+``` 
+
+Which is the same as:
+```
+make master-start UC='engine'
+make proxy-start DEVICE='proxy01' UC='engine'
+(wait X seconds until proxy starts)
+make accept-keys UC='engine'
+```
+
+### 3- Connect to Salt Master and Proxy
+
+Connect to the master:
+```
+make master-shell UC='engine'
+```
+
+Connect to the proxy:
+```
+make proxy-shell DEVICE='proxy01' UC='engine'
+```
+
+### 4- Configure Junos device to send Syslog to the Salt Master
+
+Check IP of Salt Master
+```
+make master-shell UC='engine'
+ifconfig eth0
+```
+
+```
+#ssh <ip-junos>
+
+root@vmx> configure
+root@vmx# set system syslog host <saltmaster-engine-eth0> 
+root@vmx# commit 
+
+```
+
+**Optional**
+
+We expose the Syslog port 516 of saltmaster-engine to the host operation system on port 8516.
+
+If Junos device is therefore not in the same subnet as the docker containers (routed environment), then a configuration on port 8516 destination IP of the server hosting the docker can be used.
+
+``` 
+#ssh <ip-junos>
+
+root@vmx> configure
+root@vmx# set system syslog host <server-hosting-docker-containers-ip> port 8516  
+root@vmx# commit 
+```
+
+### 5- Trigger event
+
+Two options exist, configure anything on the Junos device and commit or use a `salt-call`.
+
+For the latter, please refer to [salt-call](#salt-call).
+
+### 6 - Result
+
+See here [the events triggered under Salt Master](#result)
+
+
+### Under the hood
+
+- A reactor is configured under `/etc/salt/master.d/reactor.conf`
+- The engine is configured under `/etc/salt/master`
+- As soon as `UI_COMMIT_COMPLETED` is received from proxy01 (`jnpr/event/proxy01/UI_COMMIT_COMPLETED`) the reactor reacts and executes a sls under `/srv/reactor/` in our case defined as `junos.sls`
+- When `junos.sls` is used by SaltStack, it tries to connect to Junos device via proxy01 (defined under `/srv/pillar/proxy01.sls` and `/srv/pillar/top.sls`) and executes the command `show version` on the device.
+- if successful the [result](#result) can be seen.
+
+## <a id='salt-call'></a>When using salt-call
+
+Salt-call must summon a salt-minion on the saltmaster-engine, to send and process that event.
+
+Prerequisite steps are therefore need to be done, to make `salt-call` work:
 1) Edit `/etc/salt/minion` and replace `master: salt` with `master: saltmaster-engine`
 2) Restart the saltmaster-engine from host machine with `docker restart saltmaster-engine`
 3) Accept the minion key on the master with `salt-keys -yA`
 
+This salt-call can be used test the event under saltmaster-engine:
+```
+salt-call event.send 'jnpr/event/proxy01/UI_COMMIT_COMPLETED' '{"host": "172.17.254.1", "data": {"severity": 4, "appname": "mgd", "timestamp": "2016-11-17 19:30:14", "hostname": "proxy01", "pid": "84", "priority": 188 }'
+```
+
+## <a id='result'></a>Result
+
+When receiving an event, you should see something along those lines:
 
 ```
 root@saltmaster-engine:/# salt-run state.event pretty=True
