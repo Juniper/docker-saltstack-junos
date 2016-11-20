@@ -1,0 +1,2 @@
+master: saltmaster-default
+multiprocessing: False
