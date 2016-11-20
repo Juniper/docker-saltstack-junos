@@ -22,11 +22,13 @@ In this project you'll find:
 
 - Ubuntu 14.04 - 16.04 
 
-# Skipping Section
+# Skipping reading
 
-If you want to dive into the use-cases directly -not caring about possible `make` commands- then please skip this section and read the README within each folder.
+We believe to have the best possible understanding/knowledge, you should read all the documentation (in here and each use-case folder).
 
-If not continue reading. 
+To save time, the minimum what you should read:
+- The documentation applicable for your use-case.
+- (Example make commands under this document)[#example].
 
 # Deep-dive into the Makefile
  
@@ -241,6 +243,44 @@ It is equivalent to:
 make master-clean
 make minion-clean
 make proxy-clean
+```
+
+#<a href id="example"></a>Example of make commands
+
+```
+#Spin a default master
+make master-start 
+
+#Start master-shell for default
+make master-shell 
+
+#Start master-shell of "Engine" use-case
+maske master-shell UC="engine"
+
+#Spin a minion with name "foo"
+make minion-start DEVICE="foo"
+
+#Spin a proxy with name "bar" within "Engine" use-case
+make proxy-start DEVICE="bar" UC="engine"
+
+#Spin a minion without name but within "Beacon" use-case
+make minion-start UC="beacon"
+
+#Start shell of proxy "bar"
+make proxy-start DEVICE="bar" UC="engine"
+
+#Clean-up the minion "foo"
+make minion-clean DEVICE="foo"
+
+#Clean-up the proxy "bar"
+make proxy-clean DEVICE="bar" UC="engine"
+
+#Clean all containers under "Engine" use-case
+make clean UC="engine"
+
+#Clean all containers under default use-case
+```
+make clean
 ```
 
 # Operation - useful tips/tricks commands
