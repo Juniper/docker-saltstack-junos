@@ -2,7 +2,7 @@
 
 The idea:
 - To show how we monitor a Junos string within a file and convert it to an event.
-...- Natively this not supported within SaltStack; thereby, included in this use-case a custom beacon module.
+..- Natively this not supported within SaltStack; thereby, included in this use-case a custom beacon module.
 
 Example show here:
 - Monitor `ERROR` on a salt-minion file called `/var/log/random.log` and upon receiving this `ERROR` from the minion on the master, master restarts the process and writes a file in `/tmp/random_process_restart.log`
@@ -83,12 +83,12 @@ Restarting random deamon because of error: Critical ERROR occured
 
 ### Under the hood
 - At start-up (`make start-uc-beacon`):
-...- A reactor is configured on the saltmaster-beacon under `/etc/salt/master.d/reactor.conf` which gets executed and calls a rule set under `/srv/reactor/monitor_message.sls` 
-...- The customer beacon is put under `/srv/salt/_beacon/` on the saltmaster-beacon and syncronised to minion01 via `salt "minion01" saltutil.sync_beacons`
-...- Because of ticket # the SaltStack minion `minion01` needs to be restarted. This is done via `docker restart minion01`
+..- A reactor is configured on the saltmaster-beacon under `/etc/salt/master.d/reactor.conf` which gets executed and calls a rule set under `/srv/reactor/monitor_message.sls` 
+..- The customer beacon is put under `/srv/salt/_beacon/` on the saltmaster-beacon and syncronised to minion01 via `salt "minion01" saltutil.sync_beacons`
+..- Because of ticket # the SaltStack minion `minion01` needs to be restarted. This is done via `docker restart minion01`
 - At operation:
-...- Under the `/srv/pillar/top.sls` on the saltmaster-beacon a beacon is defined under `/srv/pillar/log.sls`. This definition is the also syncronised to minion01, so the minion knows what needs to be done.
-...- Within the `log.sls` there is a configuration specifying a regex which should be matched.
-...- When a match has been found, the raw message is send to the reactor on the event-bus to the saltmaster-beacon, which in return executes `/srv/reactor/monitor_message.sls`
+..- Under the `/srv/pillar/top.sls` on the saltmaster-beacon a beacon is defined under `/srv/pillar/log.sls`. This definition is the also syncronised to minion01, so the minion knows what needs to be done.
+..- Within the `log.sls` there is a configuration specifying a regex which should be matched.
+..- When a match has been found, the raw message is send to the reactor on the event-bus to the saltmaster-beacon, which in return executes `/srv/reactor/monitor_message.sls`
 
 
