@@ -14,8 +14,28 @@
 # limitations under the License.
 # Please make sure to run this file as a root user
 
-master_name = saltmaster
-PWD = $(shell pwd)
+TMP = $(shell pwd)
+
+UC_E = engine
+UC_B = beacon
+
+ifndef UC
+PWD = $(TMP)/uc-default
+master_name = saltmaster-default
+else
+ifeq "$(UC)" "$(UC_E)"
+PWD = $(TMP)/uc-$(UC_E)
+master_name = saltmaster-engine
+else
+ifeq "$(UC)" "$(UC_B)"
+PWD = $(TMP)/uc-$(UC_B)
+master_name = saltmaster-beacon
+else
+$(error Use case "$(UC)" does not exist)
+endif
+endif
+endif
+
 RUN_PATH := $(PWD)/run
 RUN_MINION += $(RUN_PATH)/started_minions.log
 RUN_PROXY +=  $(RUN_PATH)/started_proxies.log
@@ -24,24 +44,38 @@ DOCKER_EXEC := @docker exec -i -t
 DOCKER_EXEC_MASTER := $(DOCKER_EXEC) $(master_name)
 
 DOCKER_RUN := @docker run -d 
-DOCKER_RUN_MASTER := $(DOCKER_RUN) -h $(master_name) --volume $(PWD)/pillar:/srv/pillar
+DOCKER_RUN_MASTER := $(DOCKER_RUN) -h $(master_name) 
+DOCKER_RUN_MASTER += --volume $(PWD)/pillar:/srv/pillar
+
+ifdef UC
 DOCKER_RUN_MASTER += --volume $(PWD)/reactor:/srv/reactor
-DOCKER_RUN_MASTER += --volume $(PWD)/engine:/srv/engine
+endif
+
+ifeq "$(UC)" "$(UC_B)"
 DOCKER_RUN_MASTER += --volume $(PWD)/docker/master:/etc/salt/master.d
 DOCKER_RUN_MASTER += --volume $(PWD)/docker/_beacons:/srv/salt/_beacons
-#DOCKER_RUN_MASTER += --volume $(PWD)/docker/minion:/etc/salt/minion.d
+endif
+
+ifeq "$(UC)" "$(UC_E)"
 DOCKER_RUN_MASTER += --volume $(PWD)/docker/salt_master.yaml:/etc/salt/master
+DOCKER_RUN_MASTER += --volume $(PWD)/docker/master:/etc/salt/master.d
+DOCKER_RUN_MASTER += --volume $(PWD)/engine:/srv/engine
+endif
+
+ifeq "$(UC)" "$(UC_E)"
 DOCKER_RUN_MASTER += --publish 8516:516/udp
+endif
 
 DOCKER_LINK := $(DOCKER_RUN) --link $(master_name):$(master_name)
 
 DOCKER_RUN_MINION := $(DOCKER_LINK) 
 DOCKER_RUN_MINION += --volume $(PWD)/docker/salt_minion.yaml:/etc/salt/minion
-#DOCKER_RUN_MINION += --volume $(PWD)/docker/minion:/etc/salt/minion.d
-DOCKER_RUN_MINION += --volume $(PWD)/pillar:/srv/pillar
+ifeq "$(UC)" "$(UC_B)"
+DOCKER_RUN_MINION += --volume $(PWD)/docker/random.log:/var/log/random.log
+endif
 
-DOCKER_RUN_PROXY := $(DOCKER_LINK) --volume $(PWD)/docker/salt_proxy.yaml:/etc/salt/proxy
-DOCKER_RUN_PROXY += --volume $(PWD)/pillar:/srv/pillar
+DOCKER_RUN_PROXY := $(DOCKER_LINK) 
+DOCKER_RUN_PROXY += --volume $(PWD)/docker/salt_proxy.yaml:/etc/salt/proxy
 
 STOP_RM_DOCKER = echo "Stopping:$(1)" && docker stop $(1) 1>/dev/null && echo "Removing:" $(1) && docker rm $(1) 1>/dev/null
 
@@ -66,6 +100,13 @@ master-keys:
 accept-keys:
 	$(DOCKER_EXEC_MASTER) salt-key -yA
 
+master-sync-beacon:
+ifndef DEVICE
+	$(error DEVICE parameter is not set.)
+else
+	$(DOCKER_EXEC_MASTER) salt '$(DEVICE)' saltutil.sync_beacons
+endif
+
 master-clean:
 	@$(call STOP_RM_DOCKER, $(master_name))
 
@@ -85,6 +126,19 @@ ifndef DEVICE
 else
 	$(DOCKER_EXEC) $(DEVICE) bash
 endif
+
+_exec:
+ifndef DEVICE
+	$(error DEVICE parameter is not set.)
+else
+ifndef CMD
+	$(error CMD parameter is not set.)
+else
+	$(DOCKER_EXEC) $(DEVICE) $(CMD)
+endif
+endif
+
+
 
 minion-clean:
 ifndef DEVICE
@@ -119,5 +173,21 @@ else
 	@$(call STOP_RM_DOCKER, $(DEVICE))
 	@sed -i '/$(DEVICE)/d' $(RUN_PROXY)
 endif
+
+start-uc-beacon:
+	make master-start UC='beacon'
+	make minion-start DEVICE='minion01' UC='beacon'
+	sleep 5;
+	make accept-keys UC='beacon'
+	sleep 10;
+	make _exec DEVICE='saltmaster-beacon' UC='beacon' CMD='salt "minion01" saltutil.sync_beacons'
+	docker restart minion01
+
+start-uc-engine:
+	make master-start UC='engine'
+	make proxy-start DEVICE='proxy01' UC='engine'
+	sleep 5;
+	make accept-keys UC='engine'
+	
 
 clean: master-clean minion-clean proxy-clean

@@ -1,6 +1,4 @@
 base:
-  '*':
-    - log 
   dev01:
     - dev01
   dev02:

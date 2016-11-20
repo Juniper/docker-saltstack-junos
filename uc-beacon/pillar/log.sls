@@ -1,5 +1,5 @@
 beacons:
       log:
-        file: /var/log/salt/minion
+        file: /var/log/random.log
         catch_error_messages:
                      regex: '.*ERROR.*'
