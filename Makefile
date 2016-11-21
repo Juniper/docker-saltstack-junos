@@ -90,7 +90,7 @@ VALIDATE = @if ! docker ps | grep "$(1)" > /dev/null ; then echo "Failed: Test o
 VALIDATE_NOT = @if docker ps -a | grep "$(1)" > /dev/null ; then echo "Failed: Test of cleaning $(1) $(UC)"; exit 1; fi 
 
 # Supid CI... sleep not allowed doing python time
-SLEEP = $(shell python -c "import time; time.sleep($1)")
+SLEEP = python -c "import time; time.sleep($(1))"
 
 build:
 	docker build --rm -t juniper/saltstack .
@@ -211,6 +211,7 @@ ifndef UC
 else
 ifeq "$(UC)" "engine"
 	make start-uc-engine
+	$(call SLEEP,10)
 	$(call VALIDATE,saltmaster-engine)
 	$(call VALIDATE,proxy01)
 	
@@ -222,6 +223,7 @@ ifeq "$(UC)" "engine"
 else
 ifeq "$(UC)" "beacon"
 	make start-uc-beacon
+	$(call SLEEP,10)
 	$(call VALIDATE,saltmaster-beacon)
 	$(call VALIDATE,minion01)
 	
