@@ -197,7 +197,7 @@ ifndef UC
 	$(call VALIDATE,vmx)
 	
 	make minion-start DEVICE='clean-minion01'
-	$(call SLEEP,5)
+	$(call SLEEP,30)
 	make accept-keys
 	$(call SLEEP,10)
 	
@@ -249,7 +249,7 @@ test:
 start-uc-beacon:
 	make master-start UC='beacon'
 	make minion-start DEVICE='minion01' UC='beacon'
-	$(call SLEEP,5)
+	$(call SLEEP,30)
 	make accept-keys UC='beacon'
 	$(call SLEEP,10)
 	make _exec DEVICE='saltmaster-beacon' UC='beacon' CMD='salt "minion01" saltutil.sync_beacons'
@@ -258,7 +258,7 @@ start-uc-beacon:
 start-uc-engine:
 	make master-start UC='engine'
 	make proxy-start DEVICE='proxy01' UC='engine'
-	$(call SLEEP,5)
+	$(call SLEEP,30)
 	make accept-keys UC='engine'
 	
 
