@@ -89,6 +89,9 @@ STOP_RM_DOCKER = echo "Stopping:$(1)" && docker stop $(1) 1>/dev/null && echo "R
 VALIDATE = @if ! docker ps | grep "$(1)" > /dev/null ; then echo "Failed: Test of starting $(1) $(UC)"; exit 1; fi 
 VALIDATE_NOT = @if docker ps -a | grep "$(1)" > /dev/null ; then echo "Failed: Test of cleaning $(1) $(UC)"; exit 1; fi 
 
+# Supid CI... sleep not allowed doing python time
+SLEEP = $(shell python -c "import time; time.sleep($1)")
+
 build:
 	docker build --rm -t juniper/saltstack .
 
@@ -194,10 +197,9 @@ ifndef UC
 	$(call VALIDATE,vmx)
 	
 	make minion-start DEVICE='clean-minion01'
-	@sleep 5;
-	
+	$(call SLEEP,5)
 	make accept-keys
-	@sleep 10;
+	$(call SLEEP,10)
 	
 	make minion-clean DEVICE='clean-minion01'
 	$(call VALIDATE_NOT,clean-minion01)
@@ -209,8 +211,6 @@ ifndef UC
 else
 ifeq "$(UC)" "engine"
 	make start-uc-engine
-	@sleep 10;
-	
 	$(call VALIDATE,saltmaster-engine)
 	$(call VALIDATE,proxy01)
 	
@@ -222,15 +222,13 @@ ifeq "$(UC)" "engine"
 else
 ifeq "$(UC)" "beacon"
 	make start-uc-beacon
-	@sleep 10;
-	
 	$(call VALIDATE,saltmaster-beacon)
 	$(call VALIDATE,minion01)
 	
 	$(call EXEC,$(master_name),salt \minion01 status.ping_master $(master_name))
 	$(call EXEC,$(master_name),salt \minion01 status.all_status)
 	$(call EXEC,minion01,bash -c "echo \"Testing ERROR\" >> /var/log/random.log")
-	@sleep 2;
+	$(call SLEEP,2)
 	$(call EXEC,minion01,cat /tmp/random_process_restart.log)
 	echo "Started daemon" > $(PWD)/docker/random.log
 endif
@@ -249,16 +247,16 @@ test:
 start-uc-beacon:
 	make master-start UC='beacon'
 	make minion-start DEVICE='minion01' UC='beacon'
-	@sleep 5;
+	$(call SLEEP,5)
 	make accept-keys UC='beacon'
-	@sleep 10;
+	$(call SLEEP,10)
 	make _exec DEVICE='saltmaster-beacon' UC='beacon' CMD='salt "minion01" saltutil.sync_beacons'
 	docker restart minion01
 
 start-uc-engine:
 	make master-start UC='engine'
 	make proxy-start DEVICE='proxy01' UC='engine'
-	@sleep 5;
+	$(call SLEEP,5)
 	make accept-keys UC='engine'
 	
 
