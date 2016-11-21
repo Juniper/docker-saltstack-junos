@@ -239,12 +239,12 @@ endif
 
 test:
 	make build
-	#make _test
-	#make clean
+	make _test
+	make clean
 	make _test UC='beacon'
 	make clean UC='beacon'
-	#make _test UC='engine'
-	##make clean UC='engine'
+	make _test UC='engine'
+	make clean UC='engine'
 
 start-uc-beacon:
 	make master-start UC='beacon'
