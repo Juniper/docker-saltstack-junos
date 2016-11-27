@@ -41,7 +41,7 @@ def main():
            print "salt-proxy not started: {}".format(str(e))
            return 1 
 
-    time.sleep(5)
+    time.sleep(30)
     
     try:
        subprocess.check_call(['salt-key','-yA'])
