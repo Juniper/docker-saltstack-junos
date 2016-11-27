@@ -233,7 +233,7 @@ ifeq "$(UC)" "engine"
 
 	@#$(call EXEC,$(master_name),sed -i "s/^#master: salt/master: $(master_name)/" /etc/salt/minion)
 	@#$(call EXEC,$(master_name),salt-call event.send "jnpr/event/proxy01/UI_COMMIT_COMPLETED" "{"host": "172.17.254.1"}")
-        @#TODO: Catch the event at master
+	@#TODO: Catch the event at master
 else
 ifeq "$(UC)" "beacon"
 	make start-uc-beacon
