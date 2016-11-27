@@ -45,7 +45,7 @@ RUN_MINION += $(RUN_PATH)/started_minions.log
 RUN_PROXY +=  $(RUN_PATH)/started_proxies.log
 
 DOCKER_EXEC_NONE := docker exec
-DOCKER_EXEC: += $(DOCKER_EXEC_NONE) -it 
+DOCKER_EXEC += $(DOCKER_EXEC_NONE) -it 
 DOCKER_EXEC_MASTER := $(DOCKER_EXEC) $(master_name)
 DOCKER_EXEC_MASTER_D := $(DOCKER_EXEC_NONE) $(master_name)
 
