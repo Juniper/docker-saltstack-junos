@@ -20,9 +20,10 @@ UC_E = engine
 UC_B = beacon
 
 ifndef UC
-PWD = $(TMP)/uc-default
-master_name = saltmaster-default
-EXEC = make _exec DEVICE='$(1)' CMD='$(2)'
+UC = $(UC_E)
+PWD = $(TMP)/uc-$(UC_E)
+master_name = saltmaster-engine
+EXEC = make _exec DEVICE='$(1)' UC='$(UC_E)' CMD='$(2)'
 else
 ifeq "$(UC)" "$(UC_E)"
 PWD = $(TMP)/uc-$(UC_E)
@@ -43,16 +44,16 @@ RUN_PATH := $(PWD)/run
 RUN_MINION += $(RUN_PATH)/started_minions.log
 RUN_PROXY +=  $(RUN_PATH)/started_proxies.log
 
-DOCKER_EXEC := docker exec -i -t  
+DOCKER_EXEC := docker exec -i -t
 DOCKER_EXEC_MASTER := $(DOCKER_EXEC) $(master_name)
+DOCKER_EXEC_MASTER_D := $(DOCKER_EXEC) -d $(master_name)
 
 DOCKER_RUN := @docker run -d 
 DOCKER_RUN_MASTER := $(DOCKER_RUN) -h $(master_name) 
+DOCKER_RUN_MASTER += --volume $(TMP)/bin:/etc/salt/bin
+DOCKER_RUN_MASTER += --volume $(PWD)/docker/salt_proxy.yaml:/etc/salt/proxy
 DOCKER_RUN_MASTER += --volume $(PWD)/pillar:/srv/pillar
-
-ifdef UC
 DOCKER_RUN_MASTER += --volume $(PWD)/reactor:/srv/reactor
-endif
 
 ifeq "$(UC)" "$(UC_B)"
 DOCKER_RUN_MASTER += --volume $(PWD)/docker/master:/etc/salt/master.d
@@ -63,9 +64,6 @@ ifeq "$(UC)" "$(UC_E)"
 DOCKER_RUN_MASTER += --volume $(PWD)/docker/salt_master.yaml:/etc/salt/master
 DOCKER_RUN_MASTER += --volume $(PWD)/docker/master:/etc/salt/master.d
 DOCKER_RUN_MASTER += --volume $(PWD)/engine:/srv/engine
-endif
-
-ifeq "$(UC)" "$(UC_E)"
 DOCKER_RUN_MASTER += --publish 8516:516/udp
 endif
 
@@ -85,31 +83,38 @@ STOP_RM_DOCKER = echo "Stopping:$(1)" && docker stop $(1) 1>/dev/null && echo "R
 #TODO: Accept a key automatically at master for minion/proxy when spinning up.
 #ACCEPT_SPECIFIC_KEY = $(DOCKER_EXEC_MASTER) salt-key -ya $(1)
 
-
 VALIDATE = @if ! docker ps | grep "$(1)" > /dev/null ; then echo "Failed: Test of starting $(1) $(UC)"; exit 1; fi 
 VALIDATE_NOT = @if docker ps -a | grep "$(1)" > /dev/null ; then echo "Failed: Test of cleaning $(1) $(UC)"; exit 1; fi 
 
 # Supid CI... sleep not allowed doing python time
 SLEEP = python -c "import time; time.sleep($(1))"
 
+.PHONY: build
 build:
 	docker build --rm -t juniper/saltstack .
 
+.PHONY: master-start
 master-start:
 	$(DOCKER_RUN_MASTER) --name $(master_name) juniper/saltstack salt-master -l debug 
-	
+	$(DOCKER_EXEC_MASTER_D) /etc/salt/bin/startup.py
+
 	@touch $(RUN_MINION)
 	@touch $(RUN_PROXY)
 
+
+.PHONY: master-shell
 master-shell:
 	@$(DOCKER_EXEC_MASTER) bash
 
+.PHONY: master-keys
 master-keys:
 	@$(DOCKER_EXEC_MASTER) salt-key -L
 
+.PHONY: accept-keys
 accept-keys:
 	@$(DOCKER_EXEC_MASTER) salt-key -yA
 
+.PHONY: master-sync-beacon
 master-sync-beacon:
 ifndef DEVICE
 	$(error DEVICE parameter is not set.)
@@ -117,10 +122,11 @@ else
 	@$(DOCKER_EXEC_MASTER) salt '$(DEVICE)' saltutil.sync_beacons
 endif
 
+.PHONY: master-clear
 master-clean:
 	@$(call STOP_RM_DOCKER, $(master_name))
 
-
+.PHONY: minion-start
 minion-start:
 ifndef DEVICE
 	$(DOCKER_RUN_MINION) juniper/saltstack salt-minion -l debug \
@@ -130,6 +136,7 @@ else
 	1>/dev/null && if [ $$? -eq 0 ]; then echo "$(DEVICE)" >> $(RUN_MINION); echo "Started: $(DEVICE)"; fi
 endif	
 
+.PHONY: minion-shell
 minion-shell:
 ifndef DEVICE
 	$(error DEVICE parameter is not set.)
@@ -148,8 +155,7 @@ else
 endif
 endif
 
-
-
+.PHONY: minion-clean
 minion-clean:
 ifndef DEVICE
 	@while read -r minion; do \
@@ -162,6 +168,7 @@ else
 	@sed -i '/$(DEVICE)/d' $(RUN_MINION)
 endif
 
+.PHONY: proxy-start
 proxy-start:
 ifndef DEVICE
 	$(error DEVICE parameter is not set. Please use 'make proxy-start DEVICE=<name>')
@@ -170,8 +177,10 @@ else
 	1>/dev/null && if [ $$? -eq 0 ]; then echo "$(DEVICE)" >> $(RUN_PROXY); echo "Started: $(DEVICE)"; fi  
 endif
 
+.PHONY: proxy-shell
 proxy-shell: minion-shell
 
+.PHONY: proxy-clean
 proxy-clean:
 ifndef DEVICE
 	@while read -r proxy; do \
@@ -213,13 +222,13 @@ ifeq "$(UC)" "engine"
 	make start-uc-engine
 	$(call SLEEP,10)
 	$(call VALIDATE,saltmaster-engine)
-	$(call VALIDATE,proxy01)
-	
+
+	$(call EXEC,$(master_name),cat /var/run/salt-minion.pid/proxy01)
 	$(call EXEC,$(master_name),salt \proxy01 status.ping_master $(master_name))
 	$(call EXEC,$(master_name),salt \proxy01 status.all_status)
-	$(call EXEC,proxy01,sed -i "s/^#master: salt/master: $(master_name)/" /etc/salt/minion)
-	$(call EXEC,proxy01,salt-call event.send "jnpr/event/proxy01/UI_COMMIT_COMPLETED" "{"host": "172.17.254.1"}")
-	#TODO: Catch the event at master
+	#$(call EXEC,$(master_name),sed -i "s/^#master: salt/master: $(master_name)/" /etc/salt/minion)
+	#$(call EXEC,$(master_name),salt-call event.send "jnpr/event/proxy01/UI_COMMIT_COMPLETED" "{"host": "172.17.254.1"}")
+        #TODO: Catch the event at master
 else
 ifeq "$(UC)" "beacon"
 	make start-uc-beacon
@@ -237,15 +246,17 @@ endif
 endif
 endif
 
+.PHONY: test
 test:
 	make build
-	make _test
-	make clean
+	#make _test
+	#make clean
 	make _test UC='beacon'
 	make clean UC='beacon'
 	make _test UC='engine'
 	make clean UC='engine'
 
+.PHONY: start-uc-beacon
 start-uc-beacon:
 	make master-start UC='beacon'
 	make minion-start DEVICE='minion01' UC='beacon'
@@ -255,11 +266,12 @@ start-uc-beacon:
 	make _exec DEVICE='saltmaster-beacon' UC='beacon' CMD='salt "minion01" saltutil.sync_beacons'
 	docker restart minion01
 
+.PHONY: start-uc-engine
 start-uc-engine:
 	make master-start UC='engine'
-	make proxy-start DEVICE='proxy01' UC='engine'
-	$(call SLEEP,30)
-	make accept-keys UC='engine'
+	#make proxy-start DEVICE='proxy01' UC='engine'
+	#$(call SLEEP,30)
+	#make accept-keys UC='engine'
 	
 
 clean: master-clean minion-clean proxy-clean
