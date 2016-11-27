@@ -44,7 +44,7 @@ RUN_PATH := $(PWD)/run
 RUN_MINION += $(RUN_PATH)/started_minions.log
 RUN_PROXY +=  $(RUN_PATH)/started_proxies.log
 
-DOCKER_EXEC := docker exec -i -t
+DOCKER_EXEC := docker exec -u root -i -t
 DOCKER_EXEC_MASTER := $(DOCKER_EXEC) $(master_name)
 DOCKER_EXEC_MASTER_D := $(DOCKER_EXEC) -d $(master_name)
 
