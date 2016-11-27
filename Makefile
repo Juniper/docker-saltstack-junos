@@ -44,9 +44,10 @@ RUN_PATH := $(PWD)/run
 RUN_MINION += $(RUN_PATH)/started_minions.log
 RUN_PROXY +=  $(RUN_PATH)/started_proxies.log
 
-DOCKER_EXEC := docker exec -u root -i -t
+DOCKER_EXEC_NONE := docker exec
+DOCKER_EXEC: += $(DOCKER_EXEC_NONE) -it 
 DOCKER_EXEC_MASTER := $(DOCKER_EXEC) $(master_name)
-DOCKER_EXEC_MASTER_D := $(DOCKER_EXEC) -d $(master_name)
+DOCKER_EXEC_MASTER_D := $(DOCKER_EXEC_NONE) $(master_name)
 
 DOCKER_RUN := @docker run -d 
 DOCKER_RUN_MASTER := $(DOCKER_RUN) -h $(master_name) 
@@ -95,7 +96,7 @@ build:
 
 .PHONY: master-start
 master-start:
-	$(DOCKER_RUN_MASTER) --name $(master_name) juniper/saltstack salt-master -l debug 
+	$(DOCKER_RUN_MASTER) --name $(master_name) juniper/saltstack salt-master -l debug
 	$(DOCKER_EXEC_MASTER_D) /etc/salt/bin/startup.py
 
 	@touch $(RUN_MINION)
@@ -223,6 +224,7 @@ ifeq "$(UC)" "engine"
 	$(call SLEEP,10)
 	$(call VALIDATE,saltmaster-engine)
 
+	$(call EXEC,$(master_name),ls -la /var/run/salt-minion.pid/proxy01)
 	$(call EXEC,$(master_name),salt \proxy01 status.ping_master $(master_name))
 	$(call EXEC,$(master_name),salt \proxy01 status.all_status)
 	#$(call EXEC,$(master_name),sed -i "s/^#master: salt/master: $(master_name)/" /etc/salt/minion)

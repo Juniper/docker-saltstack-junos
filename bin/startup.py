@@ -39,7 +39,7 @@ def main():
            subprocess.call(['salt-proxy',s,'-l','debug','-d'])
         except Exception as e:
            print "salt-proxy not started: {}".format(str(e))
-           return 0
+           return 1 
 
     time.sleep(5)
     
@@ -47,11 +47,12 @@ def main():
        subprocess.check_call(['salt-key','-yA'])
     except Exception as e:
        print "salt-key did not work: {}".format(str(e))
-       return 0
+       return 1
+
+    return 0
 
 if __name__ == '__main__':
      main()
-
 
 
 
