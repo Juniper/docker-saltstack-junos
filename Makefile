@@ -227,9 +227,13 @@ ifeq "$(UC)" "engine"
 	$(call EXEC,$(master_name),bash -c "ps -ef | grep proxy01 | grep -v grep")
 	$(call EXEC,$(master_name),salt \proxy01 status.ping_master $(master_name))
 	$(call EXEC,$(master_name),salt \proxy01 status.all_status)
-	#$(call EXEC,$(master_name),sed -i "s/^#master: salt/master: $(master_name)/" /etc/salt/minion)
-	#$(call EXEC,$(master_name),salt-call event.send "jnpr/event/proxy01/UI_COMMIT_COMPLETED" "{"host": "172.17.254.1"}")
-        #TODO: Catch the event at master
+	$(call EXEC,$(master_name),bash -c "ps -ef | grep proxy02 | grep -v grep")
+	$(call EXEC,$(master_name),salt \proxy02 status.ping_master $(master_name))
+	$(call EXEC,$(master_name),salt \proxy02 status.all_status)
+
+	@#$(call EXEC,$(master_name),sed -i "s/^#master: salt/master: $(master_name)/" /etc/salt/minion)
+	@#$(call EXEC,$(master_name),salt-call event.send "jnpr/event/proxy01/UI_COMMIT_COMPLETED" "{"host": "172.17.254.1"}")
+        @#TODO: Catch the event at master
 else
 ifeq "$(UC)" "beacon"
 	make start-uc-beacon
@@ -242,7 +246,7 @@ ifeq "$(UC)" "beacon"
 	$(call EXEC,minion01,bash -c "echo \"Testing ERROR\" >> /var/log/random.log")
 	$(call SLEEP,2)
 	$(call EXEC,minion01,cat /tmp/random_process_restart.log)
-	echo "Started daemon" > $(PWD)/docker/random.log
+	@echo "Started daemon" > $(PWD)/docker/random.log
 endif
 endif
 endif
@@ -250,8 +254,8 @@ endif
 .PHONY: test
 test:
 	make build
-	#make _test
-	#make clean
+	@#make _test
+	@#make clean
 	make _test UC='beacon'
 	make clean UC='beacon'
 	make _test UC='engine'
@@ -270,9 +274,9 @@ start-uc-beacon:
 .PHONY: start-uc-engine
 start-uc-engine:
 	make master-start UC='engine'
-	#make proxy-start DEVICE='proxy01' UC='engine'
-	#$(call SLEEP,30)
-	#make accept-keys UC='engine'
+	@#make proxy-start DEVICE='proxy01' UC='engine'
+	@#$(call SLEEP,30)
+	@#make accept-keys UC='engine'
 	
 
 clean: master-clean minion-clean proxy-clean

@@ -7,12 +7,64 @@ In this project you'll find:
 - **A Use-Case with SaltStack Engine** to collect Syslog from Junos and convert them into Events in SaltStack
 - **A Use-Case with SaltStack Beacon** to monitor a Junos string in a file and convert it into Event in SaltStack
 
+
+# 'Hello World' with Engine
+
+## 1- Define Proxies
+
+Define `uc-engine/pillar/top.sls` for example: 
+
+```
+#cat uc-engine/pillar/top.sls
+base:
+  proxy01:
+    - proxy01
+```
+
+and associate  under `uc-engine/pillar/`:
+
+```
+#cat uc-engine/pillar/proxy01.sls
+proxy:
+   proxytype: junos
+   host: 172.17.254.1
+   username: admin
+   passwd: juniper1
+```
+
+## 2- Start Salt Master, Engine and Proxies Automatically 
+
+Under the main directory execute:
+
+```
+make salt-uc-engine
+```
+
+## 3- Verify
+
+Verify that `saltmaster-engine` is running:
+
+```
+docker ps 
+```
+
+
+## 4- Access Salt Master Shell
+
+```
+make master-shell
+```
+
 # Contributer
 
 - Damien Garros
 - Iddo Cohen
 - Nitin Kumar
 - Stephen Steiner 
+
+# Table of Content
+
+
 
 # Known Issues
 
