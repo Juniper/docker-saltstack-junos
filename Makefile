@@ -223,6 +223,7 @@ ifeq "$(UC)" "engine"
 	$(call SLEEP,10)
 	$(call VALIDATE,saltmaster-engine)
 
+	$(call SLEEP,30)
 	$(call EXEC,$(master_name),cat /var/run/salt-minion.pid/proxy01)
 	$(call EXEC,$(master_name),salt \proxy01 status.ping_master $(master_name))
 	$(call EXEC,$(master_name),salt \proxy01 status.all_status)
