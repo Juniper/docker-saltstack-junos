@@ -68,3 +68,10 @@ RUN pip install pyparsing twisted
 
 #Slim the container a litte.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /root/install_salt.sh
+
+#RUN pip install fabric
+
+COPY bin/startup.py /etc/salt/bin/
+COPY bin/entrypoint.sh /etc/salt/bin/
+
+ENTRYPOINT ["/etc/salt/bin/entrypoint.sh"]

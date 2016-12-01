@@ -2,6 +2,8 @@ sudo: required
 
 services: 
     - docker
+env:
+    - ON_TRAVIS=yes
 
 script:
     - make test

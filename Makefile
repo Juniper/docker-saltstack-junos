@@ -51,10 +51,11 @@ DOCKER_EXEC_MASTER_D := $(DOCKER_EXEC_NONE) $(master_name)
 
 DOCKER_RUN := @docker run -d 
 DOCKER_RUN_MASTER := $(DOCKER_RUN) -h $(master_name) 
-DOCKER_RUN_MASTER += --volume $(TMP)/bin:/etc/salt/bin
+#DOCKER_RUN_MASTER += --volume $(TMP)/bin:/etc/salt/bin
 DOCKER_RUN_MASTER += --volume $(PWD)/docker/salt_proxy.yaml:/etc/salt/proxy
 DOCKER_RUN_MASTER += --volume $(PWD)/pillar:/srv/pillar
 DOCKER_RUN_MASTER += --volume $(PWD)/reactor:/srv/reactor
+DOCKER_RUN_MASTER += --volume $(PWD)/docker/salt_master.yaml:/etc/salt/master
 
 ifeq "$(UC)" "$(UC_B)"
 DOCKER_RUN_MASTER += --volume $(PWD)/docker/master:/etc/salt/master.d
@@ -62,7 +63,6 @@ DOCKER_RUN_MASTER += --volume $(PWD)/docker/_beacons:/srv/salt/_beacons
 endif
 
 ifeq "$(UC)" "$(UC_E)"
-DOCKER_RUN_MASTER += --volume $(PWD)/docker/salt_master.yaml:/etc/salt/master
 DOCKER_RUN_MASTER += --volume $(PWD)/docker/master:/etc/salt/master.d
 DOCKER_RUN_MASTER += --volume $(PWD)/engine:/srv/engine
 DOCKER_RUN_MASTER += --publish 8516:516/udp
@@ -87,8 +87,8 @@ STOP_RM_DOCKER = echo "Stopping:$(1)" && docker stop $(1) 1>/dev/null && echo "R
 VALIDATE = @if ! docker ps | grep "$(1)" > /dev/null ; then echo "Failed: Test of starting $(1) $(UC)"; exit 1; fi 
 VALIDATE_NOT = @if docker ps -a | grep "$(1)" > /dev/null ; then echo "Failed: Test of cleaning $(1) $(UC)"; exit 1; fi 
 
-# Supid CI... sleep not allowed doing python time
-SLEEP = python -c "import time; time.sleep($(1))"
+# Supid CI... sleep not allowed. Doing python time. Furhtermore, checking if ON_TRAVIS and extending delay...
+SLEEP = @if test -z $$ON_TRAVIS; then python -c "import time; time.sleep($(1))"; else python -c "import time; time.sleep($(1)+20)"; fi
 
 .PHONY: build
 build:
@@ -97,7 +97,6 @@ build:
 .PHONY: master-start
 master-start:
 	$(DOCKER_RUN_MASTER) --name $(master_name) juniper/saltstack salt-master -l debug
-	$(DOCKER_EXEC_MASTER_D) /etc/salt/bin/startup.py
 
 	@touch $(RUN_MINION)
 	@touch $(RUN_PROXY)
@@ -107,13 +106,13 @@ master-start:
 master-shell:
 	@$(DOCKER_EXEC_MASTER) bash
 
-.PHONY: master-keys
-master-keys:
-	@$(DOCKER_EXEC_MASTER) salt-key -L
+#.PHONY: master-keys
+#master-keys:
+#	@$(DOCKER_EXEC_MASTER) salt-key -L
 
-.PHONY: accept-keys
-accept-keys:
-	@$(DOCKER_EXEC_MASTER) salt-key -yA
+#.PHONY: accept-keys
+#accept-keys:
+#	@$(DOCKER_EXEC_MASTER) salt-key -yA
 
 .PHONY: master-sync-beacon
 master-sync-beacon:
@@ -196,32 +195,9 @@ endif
 
 
 _test:
-ifndef UC
-	make master-start
-	$(call VALIDATE,saltmaster-default)
-
-	make minion-start DEVICE='minion01'
-	$(call VALIDATE,minion01)
-	
-	make proxy-start DEVICE='vmx'	
-	$(call VALIDATE,vmx)
-	
-	make minion-start DEVICE='clean-minion01'
-	$(call SLEEP,30)
-	make accept-keys
-	$(call SLEEP,10)
-	
-	make minion-clean DEVICE='clean-minion01'
-	$(call VALIDATE_NOT,clean-minion01)
-	
-	$(call EXEC,$(master_name),salt \minion01 status.ping_master $(master_name))
-	$(call EXEC,$(master_name),salt \vmx status.ping_master $(master_name))
-	$(call EXEC,$(master_name),salt \minion01 status.all_status)
-	$(call EXEC,$(master_name),salt \vmx status.all_status)
-else
 ifeq "$(UC)" "engine"
 	make start-uc-engine
-	$(call SLEEP,10)
+	$(call SLEEP,1)
 	$(call VALIDATE,saltmaster-engine)
 
 	$(call EXEC,$(master_name),bash -c "ps -ef | grep proxy01 | grep -v grep")
@@ -237,7 +213,7 @@ ifeq "$(UC)" "engine"
 else
 ifeq "$(UC)" "beacon"
 	make start-uc-beacon
-	$(call SLEEP,10)
+	$(call SLEEP,1)
 	$(call VALIDATE,saltmaster-beacon)
 	$(call VALIDATE,minion01)
 	
@@ -247,7 +223,6 @@ ifeq "$(UC)" "beacon"
 	$(call SLEEP,2)
 	$(call EXEC,minion01,cat /tmp/random_process_restart.log)
 	@echo "Started daemon" > $(PWD)/docker/random.log
-endif
 endif
 endif
 
@@ -265,11 +240,11 @@ test:
 start-uc-beacon:
 	make master-start UC='beacon'
 	make minion-start DEVICE='minion01' UC='beacon'
-	$(call SLEEP,30)
-	make accept-keys UC='beacon'
 	$(call SLEEP,10)
+	@#make accept-keys UC='beacon'
+	@#$(call SLEEP,10)
 	make _exec DEVICE='saltmaster-beacon' UC='beacon' CMD='salt "minion01" saltutil.sync_beacons'
-	docker restart minion01
+	docker restart minion01  
 
 .PHONY: start-uc-engine
 start-uc-engine:

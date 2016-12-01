@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import with_statement
+#from fabric.api import local
 import yaml
 import subprocess
 import time
@@ -41,19 +42,11 @@ def main():
            print "salt-proxy not started: {}".format(str(e))
            return 1 
 
-    time.sleep(30)
-    
-    try:
-       subprocess.check_call(['salt-key','-yA'])
-    except Exception as e:
-       print "salt-key did not work: {}".format(str(e))
-       return 1
-
     return 0
 
 if __name__ == '__main__':
      main()
-
+     #local("/bin/bash")
 
 
 
