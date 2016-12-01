@@ -17,6 +17,7 @@ In this project you'll find:
 # Known Issues
 
 - **urllib3\util\ssl_.py - 'SNIMissingWarning, InsecurePlatform' Warnings:** Solution is to upgrade Python from 2.7.6 to 2.7.9 or ```pip install pyOpenSSL ndg-httpsclient pyasn1```. Please note it does not effect salt-master, salt-minion or salt-proxy, in their functionality. 
+- **Currently netconf port 830 must be open on the Junos device** Solution is to ```set system services netconf ssh```. Please note an option for using port 22 is being added.
 
 # Host Platforms Tested:
 
