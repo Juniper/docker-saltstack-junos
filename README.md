@@ -203,7 +203,7 @@ The proxy with given name must have:
 - A file defined under `pillar/<name>.sls`
 - A entry defined under `pillar/top.sls`
 
-Without those defined, salt-proxy deamon will work.
+Without those defined, salt-proxy deamon will not work.
 
 #####Directories mapping 
 The local directory `pillar` is automatically mapped to the internal directory `/srv/pillar`.
