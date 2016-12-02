@@ -168,30 +168,30 @@ else
 	@sed -i '/$(DEVICE)/d' $(RUN_MINION)
 endif
 
-.PHONY: proxy-start
-proxy-start:
-ifndef DEVICE
-	$(error DEVICE parameter is not set. Please use 'make proxy-start DEVICE=<name>')
-else 
-	$(DOCKER_RUN_PROXY) --name $(DEVICE) -h $(DEVICE) juniper/saltstack salt-proxy --proxyid=$(DEVICE) -l debug \
-	1>/dev/null && if [ $$? -eq 0 ]; then echo "$(DEVICE)" >> $(RUN_PROXY); echo "Started: $(DEVICE)"; fi  
-endif
+#.PHONY: proxy-start
+#proxy-start:
+#ifndef DEVICE
+#	$(error DEVICE parameter is not set. Please use 'make proxy-start DEVICE=<name>')
+#else 
+#	$(DOCKER_RUN_PROXY) --name $(DEVICE) -h $(DEVICE) juniper/saltstack salt-proxy --proxyid=$(DEVICE) -l debug \
+#	1>/dev/null && if [ $$? -eq 0 ]; then echo "$(DEVICE)" >> $(RUN_PROXY); echo "Started: $(DEVICE)"; fi  
+#endif
 
-.PHONY: proxy-shell
-proxy-shell: minion-shell
+#.PHONY: proxy-shell
+#proxy-shell: minion-shell
 
-.PHONY: proxy-clean
-proxy-clean:
-ifndef DEVICE
-	@while read -r proxy; do \
-		$(call STOP_RM_DOCKER, $$proxy); \
-	done <$(RUN_PROXY)
-	@rm $(RUN_PROXY)
-	@touch $(RUN_PROXY)
-else
-	@$(call STOP_RM_DOCKER, $(DEVICE))
-	@sed -i '/$(DEVICE)/d' $(RUN_PROXY)
-endif
+#.PHONY: proxy-clean
+#proxy-clean:
+#ifndef DEVICE
+#	@while read -r proxy; do \
+#		$(call STOP_RM_DOCKER, $$proxy); \
+#	done <$(RUN_PROXY)
+#	@rm $(RUN_PROXY)
+#	@touch $(RUN_PROXY)
+#else
+#	@$(call STOP_RM_DOCKER, $(DEVICE))
+#	@sed -i '/$(DEVICE)/d' $(RUN_PROXY)
+#endif
 
 
 _test:
@@ -254,4 +254,4 @@ start-uc-engine:
 	@#make accept-keys UC='engine'
 	
 
-clean: master-clean minion-clean proxy-clean
+clean: master-clean minion-clean

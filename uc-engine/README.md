@@ -53,20 +53,12 @@ base:
     - proxy01
 ```
 
-### 2- Start use-case
+### 2- Start Use-Case
 
 To start the use-case:
 ```
-make start-uc-engine
+make master-start 
 ``` 
-
-Which is the same as:
-```
-make master-start UC='engine'
-make proxy-start DEVICE='proxy01' UC='engine'
-(wait X seconds until proxy starts)
-make accept-keys UC='engine'
-```
 
 ### 3- Connect to Salt Master and Proxy
 
@@ -75,14 +67,12 @@ Connect to the master:
 make master-shell UC='engine'
 ```
 
-Connect to the proxy:
-```
-make proxy-shell DEVICE='proxy01' UC='engine'
-```
+Proxies are running on the master.
 
-### 4- Configure Junos device to send Syslog to the Salt Master
+### 4- Configure Junos device for Netconf over SSH (port 830) and send Syslog to the Salt Master
 
 Check IP of Salt Master
+
 ```
 # In the saltmaster-engine shell use:
 ifconfig eth0
@@ -92,7 +82,8 @@ ifconfig eth0
 #ssh <ip-junos>
 
 root@vmx> configure
-root@vmx# set system syslog host <saltmaster-engine-eth0> 
+root@vmx# set system services netconf ssh 
+root@vmx# set system syslog host <saltmaster-engine-ip-eth0> 
 root@vmx# commit 
 
 ```
