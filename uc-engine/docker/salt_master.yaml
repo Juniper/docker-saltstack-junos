@@ -5,3 +5,5 @@ engines_dirs:
 engines:
   - junos_syslog:
        port: 516
+
+auto_accept: True
