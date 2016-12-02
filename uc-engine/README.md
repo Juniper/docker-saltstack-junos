@@ -1,3 +1,18 @@
+
+## Table of Content
+   * [Use-Case - Engine Event Triggering](#use-case---engine-event-triggering)
+      * [Spin-up the use-case](#spin-up-the-use-case)
+         * [0- Get/build image](#0--getbuild-image)
+         * [1- Define Junos device](#1--define-junos-device)
+         * [2- Start Use-Case](#2--start-use-case)
+         * [3- Connect to Salt Master and Proxy](#3--connect-to-salt-master-and-proxy)
+         * [4- Configure Junos device for Netconf over SSH (port 830) and send Syslog to the Salt Master](#4--configure-junos-device-for-netconf-over-ssh-port-830-and-send-syslog-to-the-salt-master)
+         * [5- Trigger event](#5--trigger-event)
+         * [6 - Result](#6---result)
+         * [Under the hood](#under-the-hood)
+      * [When using salt-call](#when-using-salt-call)
+      * [Result](#result)
+
 # Use-Case - Engine Event Triggering
 
 The idea: 
@@ -53,20 +68,12 @@ base:
     - proxy01
 ```
 
-### 2- Start use-case
+### 2- Start Use-Case
 
 To start the use-case:
 ```
-make start-uc-engine
+make master-start 
 ``` 
-
-Which is the same as:
-```
-make master-start UC='engine'
-make proxy-start DEVICE='proxy01' UC='engine'
-(wait X seconds until proxy starts)
-make accept-keys UC='engine'
-```
 
 ### 3- Connect to Salt Master and Proxy
 
@@ -75,14 +82,12 @@ Connect to the master:
 make master-shell UC='engine'
 ```
 
-Connect to the proxy:
-```
-make proxy-shell DEVICE='proxy01' UC='engine'
-```
+Proxies are running on the master.
 
-### 4- Configure Junos device to send Syslog to the Salt Master
+### 4- Configure Junos device for Netconf over SSH (port 830) and send Syslog to the Salt Master
 
 Check IP of Salt Master
+
 ```
 # In the saltmaster-engine shell use:
 ifconfig eth0
@@ -92,7 +97,8 @@ ifconfig eth0
 #ssh <ip-junos>
 
 root@vmx> configure
-root@vmx# set system syslog host <saltmaster-engine-eth0> 
+root@vmx# set system services netconf ssh 
+root@vmx# set system syslog host <saltmaster-engine-ip-eth0> 
 root@vmx# commit 
 
 ```
