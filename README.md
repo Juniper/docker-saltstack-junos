@@ -1,7 +1,6 @@
 # SaltStack Docker Containers for Junos
 
-master: [![Build Status](https://travis-ci.org/Juniper/docker-saltstack-junos.svg?branch=master)](https://travis-ci.org/Juniper/docker-saltstack-junos) 
-dev/features: [![Build Status](https://travis-ci.org/iddocohen/docker-saltstack-junos.svg?branch=master)](https://travis-ci.org/iddocohen/docker-saltstack-junos)
+[![Build Status](https://travis-ci.org/Juniper/docker-saltstack-junos.svg?branch=master)](https://travis-ci.org/Juniper/docker-saltstack-junos)
 
 This project has been designed to help you to get started easily with SaltStack on Junos.
 In this project you'll find:
