@@ -72,6 +72,6 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /root/install
 #RUN pip install fabric
 
 COPY bin/startup.py /etc/salt/bin/
-COPY bin/entrypoint.sh /etc/salt/bin/
+COPY bin/entrypoint.sh /
 
-ENTRYPOINT ["/etc/salt/bin/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]

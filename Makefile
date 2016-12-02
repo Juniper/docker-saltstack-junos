@@ -199,7 +199,7 @@ ifeq "$(UC)" "engine"
 	make start-uc-engine
 	$(call SLEEP,1)
 	$(call VALIDATE,saltmaster-engine)
-
+	$(call SLEEP,5)
 	$(call EXEC,$(master_name),bash -c "ps -ef | grep proxy01 | grep -v grep")
 	$(call EXEC,$(master_name),salt \proxy01 status.ping_master $(master_name))
 	$(call EXEC,$(master_name),salt \proxy01 status.all_status)

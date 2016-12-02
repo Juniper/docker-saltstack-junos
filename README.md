@@ -1,7 +1,6 @@
 # SaltStack Docker Containers for Junos
 
-[![Build Status](https://travis-ci.org/iddocohen/docker-saltstack-junos.svg?branch=master)](https://travis-ci.org/iddocohen/docker-saltstack-junos)
-[![Build Status](https://travis-ci.org/Juniper/docker-saltstack-junos.svg?branch=master)](https://travis-ci.org/Juniper/docker-saltstack-junos)
+master: [![Build Status](https://travis-ci.org/Juniper/docker-saltstack-junos.svg?branch=master)](https://travis-ci.org/Juniper/docker-saltstack-junos) dev: [![Build Status](https://travis-ci.org/iddocohen/docker-saltstack-junos.svg?branch=master)](https://travis-ci.org/iddocohen/docker-saltstack-junos)
 
 This project has been designed to help you to get started easily with SaltStack on Junos.
 In this project you'll find:
@@ -17,8 +16,9 @@ In this project you'll find:
 
 Define `uc-engine/pillar/top.sls` for example: 
 
-```
-#cat uc-engine/pillar/top.sls
+```bash
+root@host# cat uc-engine/pillar/top.sls
+
 base:
   proxy01:
     - proxy01
@@ -26,8 +26,9 @@ base:
 
 and associate  under `uc-engine/pillar/`:
 
-```
-#cat uc-engine/pillar/proxy01.sls
+```bash
+root@host# cat uc-engine/pillar/proxy01.sls
+
 proxy:
    proxytype: junos
    host: 172.17.254.1
@@ -39,23 +40,23 @@ proxy:
 
 Under the main directory execute:
 
-```
-make salt-uc-engine
+```bash
+root@host# make salt-uc-engine
 ```
 
 ## 3- Verify
 
 Verify that `saltmaster-engine` is running:
 
-```
-docker ps 
+```bash
+root@host# docker ps 
 ```
 
 
 ## 4- Access Salt Master Shell
 
 ```
-make master-shell
+root@host# make master-shell
 ```
 
 # Contributer
@@ -65,13 +66,12 @@ make master-shell
 - Nitin Kumar
 - Stephen Steiner 
 
-# Table of Content
-
 
 
 # Known Issues
 
 - **urllib3\util\ssl_.py - 'SNIMissingWarning, InsecurePlatform' Warnings:** Solution is to upgrade Python from 2.7.6 to 2.7.9 or ```pip install pyOpenSSL ndg-httpsclient pyasn1```. Please note it does not effect salt-master, salt-minion or salt-proxy, in their functionality. 
+
 
 # Host Platforms Tested:
 
