@@ -1,6 +1,6 @@
 
 ## Table of Content
-      * [Use-Case - Engine Event Triggering](#use-case---engine-event-triggering)
+   * [Use-Case - Engine Event Triggering](#use-case---engine-event-triggering)
       * [Spin-up the use-case](#spin-up-the-use-case)
          * [0- Get/build image](#0--getbuild-image)
          * [1- Define Junos device](#1--define-junos-device)
@@ -13,7 +13,7 @@
       * [When using salt-call](#when-using-salt-call)
       * [Result](#result)
 
-## Use-Case - Engine Event Triggering
+# Use-Case - Engine Event Triggering
 
 The idea: 
 - To show how SaltStack can receive Syslog messages from Junos and convert them into events for SaltStack
