@@ -63,10 +63,13 @@ root@host# make master-start
 or
 
 ```bash
-root@host# docker run -t-
+#make clean will not work if starting docker like that
+
+root@host# docker run -d juniper/saltstack salt-master -l debug
+```
+
 
 *Note:* Proxies are getting automatically started within the Salt Master Engine
-
 
 ## 3- Verify
 
