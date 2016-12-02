@@ -19,7 +19,7 @@ In this project you'll find:
    * [Contributer](#contributer)
    * [Known Issues](#known-issues)
 
-# More about:
+# More Content 
    * [The Use Case Engine](uc-engine/README.md)
    * [The Use Case Beacon](uc-beacon/README.md)
    * [The Makefile](docs/MAKEFILE.md)
