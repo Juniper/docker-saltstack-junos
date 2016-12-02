@@ -1,4 +1,19 @@
-# Use-Case - Engine Event Triggering
+
+## Table of Content
+      * [Use-Case - Engine Event Triggering](#use-case---engine-event-triggering)
+      * [Spin-up the use-case](#spin-up-the-use-case)
+         * [0- Get/build image](#0--getbuild-image)
+         * [1- Define Junos device](#1--define-junos-device)
+         * [2- Start Use-Case](#2--start-use-case)
+         * [3- Connect to Salt Master and Proxy](#3--connect-to-salt-master-and-proxy)
+         * [4- Configure Junos device for Netconf over SSH (port 830) and send Syslog to the Salt Master](#4--configure-junos-device-for-netconf-over-ssh-port-830-and-send-syslog-to-the-salt-master)
+         * [5- Trigger event](#5--trigger-event)
+         * [6 - Result](#6---result)
+         * [Under the hood](#under-the-hood)
+      * [When using salt-call](#when-using-salt-call)
+      * [Result](#result)
+
+## Use-Case - Engine Event Triggering
 
 The idea: 
 - To show how SaltStack can receive Syslog messages from Junos and convert them into events for SaltStack

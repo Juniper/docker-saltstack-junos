@@ -1,3 +1,31 @@
+# Table of Content
+
+   * [Example of make commands](#example-of-make-commands)
+      * [Spin a engine master](#spin-a-engine-master)
+      * [Start master-shell for Engine Use-case](#start-master-shell-for-engine-use-case)
+      * [Spin a minion with name "foo" under Engine Use-Case](#spin-a-minion-with-name-foo-under-engine-use-case)
+      * [Spin a minion without name but within Beacon Use-Case](#spin-a-minion-without-name-but-within-beacon-use-case)
+      * [Clean-up the minion with the name "foo" under Engine Use-Case](#clean-up-the-minion-with-the-name-foo-under-engine-use-case)
+      * [Clean all containers under "Engine" use-case](#clean-all-containers-under-engine-use-case)
+   * [Deep-dive into the Makefile](#deep-dive-into-the-makefile)
+      * [Makefile features:](#makefile-features)
+      * [Makefile limitations:](#makefile-limitations)
+      * [Overview of Commands](#overview-of-commands)
+         * [Build image from Dockerfile with make](#build-image-from-dockerfile-with-make)
+         * [Salt Master make commands](#salt-master-make-commands)
+            * [Start a Salt Master Docker container](#start-a-salt-master-docker-container)
+               * [Directories mapping](#directories-mapping)
+               * [Port redirect](#port-redirect)
+            * [Accessing the Salt Master Docker shell](#accessing-the-salt-master-docker-shell)
+            * [About Salt Keys](#about-salt-keys)
+            * [Stop and remove Salt Master Container](#stop-and-remove-salt-master-container)
+               * [Note](#note)
+         * [Salt Minion make commands](#salt-minion-make-commands)
+            * [Start a Salt Minion](#start-a-salt-minion)
+                  * [Note](#note-1)
+            * [Stop &amp; Remove a Salt Minion](#stop--remove-a-salt-minion)
+               * [Note](#note-2)
+         * [Clean-up everything](#clean-up-everything)
 
 # Example of make commands
 
